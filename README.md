@@ -1,4 +1,3 @@
-<<<<<<< feature/ai
 # ✦ KrishiOS
 
 > **An Offline-First AI Farming Companion**
@@ -91,4 +90,3 @@ KrishiOS aims to become an AI-powered agricultural assistant capable of:
 > **Keep documentation close to the code.**
 >
 > Every module should own its own `README.md`, while the root `README.md` acts as the project's navigation hub.
->>>>>>> main
