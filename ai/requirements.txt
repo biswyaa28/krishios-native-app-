@@ -1,0 +1,14 @@
+torch
+torchvision
+torchaudio
+opencv-python
+numpy
+pandas
+matplotlib
+scikit-learn
+pillow
+fastapi
+uvicorn
+python-multipart
+jupyter
+ipykernel
