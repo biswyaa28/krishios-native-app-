@@ -15,8 +15,8 @@ This repository is organized into modular documentation.
 | Document | Description |
 |----------|-------------|
 | 🗎 [AI Module](./ai/README.md) | AI architecture, training pipeline, inference, TensorFlow Lite, and model documentation. |
-| ✎ [Contributing Guide](./ai/CONTRIBUTING.md) | Development workflow, coding standards, branching strategy, and pull request guidelines. |
-| ⚖ [License](./ai/LICENSE) | Project license for the AI module. |
+| ✎ [Contributing Guide](./docs/CONTRIBUTING.md) | Development workflow, coding standards, branching strategy, and pull request guidelines. |
+| ⚖ [License](./docs/LICENSE) | Project license for the AI module. |
 
 ---
 
