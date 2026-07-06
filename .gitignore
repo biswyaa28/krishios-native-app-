@@ -103,3 +103,42 @@ logs/
 ####################################
 
 .mypy_cache/
+
+####################################
+# Flutter & Dart
+####################################
+
+*.class
+*.swp
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter build outputs
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+frontend/build/
+frontend/coverage/
+
+# Symbols & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android Studio builds
+frontend/android/app/debug/
+frontend/android/app/profile/
+frontend/android/app/release/

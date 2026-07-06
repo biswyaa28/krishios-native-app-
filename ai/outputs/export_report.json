@@ -1,0 +1,9 @@
+{
+    "model": "EfficientNet-B0",
+    "classes": 38,
+    "image_size": 224,
+    "device": "cuda",
+    "average_inference_ms": 17.303523001028225,
+    "max_difference": 0.0,
+    "export_format": "TorchScript"
+}

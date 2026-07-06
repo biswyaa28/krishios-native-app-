@@ -1,92 +1,104 @@
-# ✦ KrishiOS
-
-> **An Offline-First AI Farming Companion**
->
-> KrishiOS helps farmers detect crop diseases, receive multilingual remedies, and make informed farming decisions using Computer Vision, Edge AI, and Mobile Technology.
+# KrishiOS - Offline-First AI Farming Assistant
 
 ---
 
-# ◆ Documentation
+## 1. Introduction
 
-This repository is organized into modular documentation.
-
-## Project Documentation
-
-| Document | Description |
-|----------|-------------|
-| 🗎 [AI Module](./ai/README.md) | AI architecture, training pipeline, inference, TensorFlow Lite, and model documentation. |
-| ✎ [Contributing Guide](./docs/CONTRIBUTING.md) | Development workflow, coding standards, branching strategy, and pull request guidelines. |
-| ⚖ [License](./docs/LICENSE) | Project license for the AI module. |
+KrishiOS is a mobile assistant application designed to assist smallholder farmers in remote areas. It leverages Computer Vision and Edge AI to diagnose crop diseases and suggest recovery steps entirely offline.
 
 ---
 
-# ◆ Repository Structure
+## 2. Key Features
+
+* **Offline Disease Diagnosis:** Performs on-device image classification on leaf images using an optimized edge model (EfficientNet-B0) to detect 38 distinct crop states.
+* **Agricultural Weather Forecasts:** Fetches real-time localized current weather and precipitation forecasts using geolocator coordinates and the Open-Meteo REST API.
+* **Community Forum:** Enables farmers to share posts, comments, and advice locally with neighboring fields.
+* **Performance Analytics:** Provides custom circular gauges and health charts detailing crop yield analytics.
+
+---
+
+## 3. Technology Stack
+
+* **Frontend:** Flutter stable (Dart)
+* **Edge AI:** ONNX Runtime / TensorFlow Lite (Inference)
+* **Training Core:** PyTorch (EfficientNet-B0 Backbone)
+* **Backend (Future):** FastAPI (Python) & PostgreSQL
+
+---
+
+## 4. Repository Structure
 
 ```text
 KrishiOS/
-│
-├── ai/
-├── backend/
-├── frontend/
-├── docs/
-│
-├── README.md
-└── .gitignore
+├── .github/             # Automated CI workflows and issue templates
+├── ai/                  # AI Model training (PyTorch code, configs, datasets)
+├── docs/                # Developer guides and OS setup files
+└── frontend/            # Flutter app (screens, themes, location services)
 ```
+For a detailed overview, see [docs/development/project-structure.md](docs/development/project-structure.md).
 
 ---
 
-# ◆ Module Documentation
+## 5. Quick Start (Running Locally)
 
-Every major module should maintain its own documentation.
+### Prerequisites
+* Flutter SDK (Stable channel)
+* JDK 17
+* Android Studio / Xcode
 
-| Module | Documentation |
-|---------|---------------|
-| AI | `ai/README.md` |
-| Backend | `backend/README.md` *(Coming Soon)* |
-| Frontend | `frontend/README.md` *(Coming Soon)* |
-| Documentation | `docs/README.md` *(Coming Soon)* |
-
----
-
-# ◆ Additional Documentation
-
-As the project grows, new documentation can be added here.
-
-| Document | Status |
-|----------|--------|
-| API Documentation | Coming Soon |
-| Architecture Guide | Coming Soon |
-| Deployment Guide | Coming Soon |
-| Dataset Documentation | Coming Soon |
-| Model Cards | Coming Soon |
-| Benchmark Results | Coming Soon |
-| Changelog | Coming Soon |
+### Setup Flutter
+1. Navigate to the client directory:
+   ```bash
+   cd frontend
+   ```
+2. Download packages:
+   ```bash
+   flutter pub get
+   ```
+3. Run on a connected device/emulator:
+   ```bash
+   flutter run
+   ```
 
 ---
 
-# ◆ Team
+## 6. Documentation Index
 
-This project is developed collaboratively.
-
-Each module is independently maintained and documented to ensure scalability and maintainability.
+For detailed instructions, refer to our comprehensive documentation directory:
+* **Developer Setup:**
+  - [Windows Setup Guide](docs/installation/windows.md)
+  - [macOS Setup Guide](docs/installation/macos.md)
+  - [Linux Setup Guide](docs/installation/linux.md)
+  - [Android Target Guide](docs/installation/android.md)
+  - [iOS Target Guide](docs/installation/ios.md)
+* **Technical Guidelines:**
+  - [Architecture Design Details](docs/development/architecture.md)
+  - [Coding Standards & Styles](docs/development/coding-guidelines.md)
+  - [Git Branching & Pull Requests](docs/development/git-workflow.md)
+* **Distribution & Deployment:**
+  - [Android Packaging Guide](docs/deployment/android.md)
+  - [iOS Packaging Guide](docs/deployment/ios.md)
+  - [Release Guidelines](docs/deployment/release.md)
+* **Troubleshooting:**
+  - [Troubleshooting Common Compile Bugs](docs/installation/troubleshooting.md)
 
 ---
 
-# ✦ Vision
+## 7. Contributing
 
-KrishiOS aims to become an AI-powered agricultural assistant capable of:
-
-- ✦ Crop Disease Detection
-- ✦ Computer Vision
-- ✦ Offline Edge AI
-- ✦ Multilingual Voice Assistance
-- ✦ Weather-aware Recommendations
-- ✦ Farm Analytics
-- ✦ AI Assistant
+We welcome contributions from the community! Please read our [Contributing Guidelines](docs/CONTRIBUTING.md) to get started.
 
 ---
 
-> **Keep documentation close to the code.**
->
-> Every module should own its own `README.md`, while the root `README.md` acts as the project's navigation hub.
+## 8. License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 9. Core Team (4 Brains)
+
+* **Sneha** (Team Leader) — [LinkedIn Profile](https://www.linkedin.com/in/)
+* **Biswajit** (AI Development) — [LinkedIn Profile](https://www.linkedin.com/in/)
+* **Paarshivi** (Frontend Development) — [LinkedIn Profile](https://www.linkedin.com/in/)
+* **Zoro** (AI Development & Backend Integration) — [LinkedIn Profile](https://www.linkedin.com/in/)

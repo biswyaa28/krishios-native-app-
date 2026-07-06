@@ -1,84 +1,52 @@
-# Contributing to KrishiOS AI
+# Contributing to KrishiOS
 
-We welcome contributions to the KrishiOS AI project. Please follow these guidelines to ensure a smooth collaboration process.
-
-## Branch Strategy
-
-Follow a branch naming convention when developing new features or resolving issues:
-
-- `main`
-- `develop` (optional)
-- `feature/<feature-name>`
-
-### Examples
-
-- `feature/ai-training`
-- `feature/api`
-- `feature/inference`
+We welcome contributions from the community! This document outlines guidelines to help you contribute to KrishiOS development.
 
 ---
 
-## Commit Message Convention
+## 1. Code of Conduct
 
-Use Conventional Commits.
-
-### Examples
-
-- `feat(ai): add EfficientNet training pipeline`
-- `fix(api): handle invalid image uploads`
-- `docs(readme): update project structure`
-- `refactor(training): improve dataset loader`
-- `test(inference): add prediction tests`
+By contributing, you agree to respect and follow the [Code of Conduct](CODE_OF_CONDUCT.md) guidelines.
 
 ---
 
-## Code Style
+## 2. Getting Started
 
-- Follow PEP 8.
-- Use type hints.
-- Use `pathlib` instead of `os.path` whenever possible.
-- Add docstrings to all public functions.
-- Avoid duplicate code.
-- Keep functions small and reusable.
-
----
-
-## Folder Responsibilities
-
-The `ai` directory is organized into the following components:
-
-- **api**: Web API interfaces, routes, endpoints, and server application logic.
-- **configs**: Configuration parameters, training options, and hyperparameter specifications.
-- **dataset**: Scripts and helpers for data downloading, ingestion, and initial pipeline setups.
-- **inference**: Scripts and classes for running model predictions and evaluations on new data.
-- **models**: Neural network architectures, model declarations, and model configurations.
-- **notebooks**: Jupyter notebooks for exploratory data analysis (EDA), experiments, and visualizations.
-- **outputs**: Folder where output logs, visualization images, training metrics, and checkpoints are stored.
-- **scripts**: Utility and executable scripts for automating various workspace tasks.
-- **tests**: Unit tests, integration tests, and test suite definitions for validating the codebase.
-- **training**: Training loops, pipelines, hyperparameter search, and optimization scripts.
-- **utils**: Shared helper functions, logging configurations, and common operations.
+1. Fork the repository on GitHub.
+2. Clone your fork locally:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/KrishiOS.git
+   ```
+3. Set up the development workspace by following the [Installation Guides](docs/installation/windows.md).
 
 ---
 
-## Pull Request Checklist
+## 3. Contribution Workflow
 
-- Code builds successfully
-- Tests pass
-- No dataset committed
-- No trained models committed
-- Code follows formatting guidelines
-- Documentation updated if necessary
+### Step 1: Create a Branch
+Always develop inside a feature/bugfix branch:
+```bash
+git checkout -b feature/your-feature-name
+```
 
----
+### Step 2: Code & Format
+Before committing, make sure you format and analyze the Flutter code:
+```bash
+dart format .
+flutter analyze
+```
 
-## Do Not Commit
+### Step 3: Run Tests
+Run automated tests to ensure no regressions are introduced:
+```bash
+flutter test
+```
 
-Never commit:
+### Step 4: Commit
+Write semantic commit messages:
+```bash
+git commit -m "feat(scan): add camera preview screen"
+```
 
-- datasets
-- trained models
-- virtual environments
-- logs
-- cache files
-- generated outputs
+### Step 5: Pull Request
+Push to your fork and submit a Pull Request targeting the `develop` or `main` branch.

@@ -1,0 +1,196 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/CONTRIBUTING.md', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 144c41e..d461dda 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -102,4 +102,43 @@[m [mlogs/[m
+ # Mypy[m
+ ####################################[m
+ [m
+[31m-.mypy_cache/[m
+\ No newline at end of file[m
+[32m+[m[32m.mypy_cache/[m
+[32m+[m
+[32m+[m[32m####################################[m
+[32m+[m[32m# Flutter & Dart[m
+[32m+[m[32m####################################[m
+[32m+[m
+[32m+[m[32m*.class[m
+[32m+[m[32m*.swp[m
+[32m+[m[32m.atom/[m
+[32m+[m[32m.build/[m
+[32m+[m[32m.buildlog/[m
+[32m+[m[32m.history[m
+[32m+[m[32m.svn/[m
+[32m+[m[32m.swiftpm/[m
+[32m+[m[32mmigrate_working_dir/[m
+[32m+[m
+[32m+[m[32m# IntelliJ / Android Studio related[m
+[32m+[m[32m*.iml[m
+[32m+[m[32m*.ipr[m
+[32m+[m[32m*.iws[m
+[32m+[m[32m.idea/[m
+[32m+[m
+[32m+[m[32m# Flutter build outputs[m
+[32m+[m[32m**/doc/api/[m
+[32m+[m[32m**/ios/Flutter/.last_build_id[m
+[32m+[m[32m.dart_tool/[m
+[32m+[m[32m.flutter-plugins-dependencies[m
+[32m+[m[32m.pub-cache/[m
+[32m+[m[32m.pub/[m
+[32m+[m[32mfrontend/build/[m
+[32m+[m[32mfrontend/coverage/[m
+[32m+[m
+[32m+[m[32m# Symbols & Obfuscation[m
+[32m+[m[32mapp.*.symbols[m
+[32m+[m[32mapp.*.map.json[m
+[32m+[m
+[32m+[m[32m# Android Studio builds[m
+[32m+[m[32mfrontend/android/app/debug/[m
+[32m+[m[32mfrontend/android/app/profile/[m
+[32m+[m[32mfrontend/android/app/release/[m
+\ No newline at end of file[m
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 21be294..2059b1f 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -1,92 +1,104 @@[m
+[31m-# ✦ KrishiOS[m
+[32m+[m[32m# KrishiOS - Offline-First AI Farming Assistant[m
+ [m
+[31m-> **An Offline-First AI Farming Companion**[m
+[31m->[m
+[31m-> KrishiOS helps farmers detect crop diseases, receive multilingual remedies, and make informed farming decisions using Computer Vision, Edge AI, and Mobile Technology.[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## 1. Introduction[m
+[32m+[m
+[32m+[m[32mKrishiOS is a mobile assistant application designed to assist smallholder farmers in remote areas. It leverages Computer Vision and Edge AI to diagnose crop diseases and suggest recovery steps entirely offline.[m
+ [m
+ ---[m
+ [m
+[31m-# ◆ Documentation[m
+[32m+[m[32m## 2. Key Features[m
+ [m
+[31m-This repository is organized into modular documentation.[m
+[32m+[m[32m* **Offline Disease Diagnosis:** Performs on-device image classification on leaf images using an optimized edge model (EfficientNet-B0) to detect 38 distinct crop states.[m
+[32m+[m[32m* **Agricultural Weather Forecasts:** Fetches real-time localized current weather and precipitation forecasts using geolocator coordinates and the Open-Meteo REST API.[m
+[32m+[m[32m* **Community Forum:** Enables farmers to share posts, comments, and advice locally with neighboring fields.[m
+[32m+[m[32m* **Performance Analytics:** Provides custom circular gauges and health charts detailing crop yield analytics.[m
+ [m
+[31m-## Project Documentation[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## 3. Technology Stack[m
+ [m
+[31m-| Document | Description |[m
+[31m-|----------|-------------|[m
+[31m-| 🗎 [AI Module](./ai/README.md) | AI architecture, training pipeline, inference, TensorFlow Lite, and model documentation. |[m
+[31m-| ✎ [Contributing Guide](./docs/CONTRIBUTING.md) | Development workflow, coding standards, branching strategy, and pull request guidelines. |[m
+[31m-| ⚖ [License](./docs/LICENSE) | Project license for the AI module. |[m
+[32m+[m[32m* **Frontend:** Flutter stable (Dart)[m
+[32m+[m[32m* **Edge AI:** ONNX Runtime / TensorFlow Lite (Inference)[m
+[32m+[m[32m* **Training Core:** PyTorch (EfficientNet-B0 Backbone)[m
+[32m+[m[32m* **Backend (Future):** FastAPI (Python) & PostgreSQL[m
+ [m
+ ---[m
+ [m
+[31m-# ◆ Repository Structure[m
+[32m+[m[32m## 4. Repository Structure[m
+ [m
+ ```text[m
+ KrishiOS/[m
+[31m-│[m
+[31m-├── ai/[m
+[31m-├── backend/[m
+[31m-├── frontend/[m
+[31m-├── docs/[m
+[31m-│[m
+[31m-├── README.md[m
+[31m-└── .gitignore[m
+[32m+[m[32m├── .github/             # Automated CI workflows and issue templates[m
+[32m+[m[32m├── ai/                  # AI Model training (PyTorch code, configs, datasets)[m
+[32m+[m[32m├── docs/                # Developer guides and OS setup files[m
+[32m+[m[32m└── frontend/            # Flutter app (screens, themes, location services)[m
+ ```[m
+[32m+[m[32mFor a detailed overview, see [docs/development/project-structure.md](docs/development/project-structure.md).[m
+ [m
+ ---[m
+ [m
+[31m-# ◆ Module Documentation[m
+[31m-[m
+[31m-Every major module should maintain its own documentation.[m
+[31m-[m
+[31m-| Module | Documentation |[m
+[31m-|---------|---------------|[m
+[31m-| AI | `ai/README.md` |[m
+[31m-| Backend | `backend/README.md` *(Coming Soon)* |[m
+[31m-| Frontend | `frontend/README.md` *(Coming Soon)* |[m
+[31m-| Documentation | `docs/README.md` *(Coming Soon)* |[m
+[32m+[m[32m## 5. Quick Start (Running Locally)[m
+[32m+[m
+[32m+[m[32m### Prerequisites[m
+[32m+[m[32m* Flutter SDK (Stable channel)[m
+[32m+[m[32m* JDK 17[m
+[32m+[m[32m* Android Studio / Xcode[m
+[32m+[m
+[32m+[m[32m### Setup Flutter[m
+[32m+[m[32m1. Navigate to the client directory:[m
+[32m+[m[32m   ```bash[m
+[32m+[m[32m   cd frontend[m
+[32m+[m[32m   ```[m
+[32m+[m[32m2. Download packages:[m
+[32m+[m[32m   ```bash[m
+[32m+[m[32m   flutter pub get[m
+[32m+[m[32m   ```[m
+[32m+[m[32m3. Run on a connected device/emulator:[m
+[32m+[m[32m   ```bash[m
+[32m+[m[32m   flutter run[m
+[32m+[m[32m   ```[m
+ [m
+ ---[m
+ [m
+[31m-# ◆ Additional Documentation[m
+[31m-[m
+[31m-As the project grows, new documentation can be added here.[m
+[31m-[m
+[31m-| Document | Status |[m
+[31m-|----------|--------|[m
+[31m-| API Documentation | Coming Soon |[m
+[31m-| Architecture Guide | Coming Soon |[m
+[31m-| Deployment Guide | Coming Soon |[m
+[31m-| Dataset Documentation | Coming Soon |[m
+[31m-| Model Cards | Coming Soon |[m
+[31m-| Benchmark Results | Coming Soon |[m
+[31m-| Changelog | Coming Soon |[m
+[32m+[m[32m## 6. Documentation Index[m
+[32m+[m
+[32m+[m[32mFor detailed instructions, refer to our comprehensive documentation directory:[m
+[32m+[m[32m* **Developer Setup:**[m
+[32m+[m[32m  - [Windows Setup Guide](docs/installation/windows.md)[m
+[32m+[m[32m  - [macOS Setup Guide](docs/installation/macos.md)[m
+[32m+[m[32m  - [Linux Setup Guide](docs/installation/linux.md)[m
+[32m+[m[32m  - [Android Target Guide](docs/installation/android.md)[m
+[32m+[m[32m  - [iOS Target Guide](docs/installation/ios.md)[m
+[32m+[m[32m* **Technical Guidelines:**[m
+[32m+[m[32m  - [Architecture Design Details](docs/development/architecture.md)[m
+[32m+[m[32m  - [Coding Standards & Styles](docs/development/coding-guidelines.md)[m
+[32m+[m[32m  - [Git Branching & Pull Requests](docs/development/git-workflow.md)[m
+[32m+[m[32m* **Distribution & Deployment:**[m
+[32m+[m[32m  - [Android Packaging Guide](docs/deployment/android.md)[m
+[32m+[m[32m  - [iOS Packaging Guide](docs/deployment/ios.md)[m
+[32m+[m[32m  - [Release Guidelines](docs/deployment/release.md)[m
+[32m+[m[32m* **Troubleshooting:**[m
+[32m+[m[32m  - [Troubleshooting Common Compile Bugs](docs/installation/troubleshooting.md)[m
+ [m
+ ---[m
+ [m
+[31m-# ◆ Team[m
+[32m+[m[32m## 7. Contributing[m
+ [m
+[31m-This project is developed collaboratively.[m
+[31m-[m
+[31m-Each module is independently maintained and documented to ensure scalability and maintainability.[m
+[32m+[m[3
