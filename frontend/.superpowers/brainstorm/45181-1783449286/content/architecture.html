@@ -1,0 +1,81 @@
+<h2>Technical Architecture</h2>
+<p class="subtitle">How each improvement fits together</p>
+
+<div class="section">
+  <h3>Architecture Overview</h3>
+  <div class="mockup">
+    <div class="mockup-header">Proposed Folder Structure</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:13px;line-height:1.8;padding:16px">
+lib/<br>
+├── main.dart<br>
+├── app.dart<br>
+├── <span style="color:var(--accent)">core/</span><br>
+│   ├── theme/<br>
+│   │   └── app_theme.dart<br>
+│   ├── constants/<br>
+│   │   └── api_constants.dart<br>
+│   └── utils/<br>
+│       └── formatters.dart<br>
+├── <span style="color:var(--accent)">features/</span><br>
+│   ├── <span style="color:#4CAF50">home/</span><br>
+│   │   ├── data/ (repositories, datasources)<br>
+│   │   ├── domain/ (models, entities)<br>
+│   │   └── presentation/ (screens, widgets)<br>
+│   ├── <span style="color:#4CAF50">weather/</span><br>
+│   │   ├── data/<br>
+│   │   ├── domain/<br>
+│   │   └── presentation/<br>
+│   ├── <span style="color:#4CAF50">community/</span><br>
+│   │   ├── data/ (firebase repos)<br>
+│   │   ├── domain/ (post, comment models)<br>
+│   │   └── presentation/ (feed, post detail)<br>
+│   ├── <span style="color:#4CAF50">scan/</span><br>
+│   │   ├── data/<br>
+│   │   ├── domain/<br>
+│   │   └── presentation/<br>
+│   └── <span style="color:#4CAF50">stats/</span><br>
+│       ├── data/<br>
+│       ├── domain/<br>
+│       └── presentation/<br>
+├── <span style="color:var(--accent)">shared/</span><br>
+│   ├── providers/ (riverpod providers)<br>
+│   ├── models/ (shared data models)<br>
+│   └── services/ (firebase, location)<br>
+└── <span style="color:var(--accent)">firebase_options.dart</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Key Decisions</h3>
+  <div class="options">
+    <div class="option" data-choice="decision-riverpod" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>Riverpod over Provider/Bloc</h3>
+        <p>Compile-safe, no BuildContext needed, better testability. Modern Flutter standard.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="decision-hive" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>Hive over SQLite/SharedPrefs</h3>
+        <p>Fast NoSQL, type-safe, offline-first. Perfect for scan history and user prefs.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="decision-firebase" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>Firebase + Cloud Functions</h3>
+        <p>Auth, Firestore for community, Cloud Functions for weather alerts & analytics processing.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="decision-clean" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">4</div>
+      <div class="content">
+        <h3>Clean Architecture (lite)</h3>
+        <p>data/domain/presentation layers per feature. Not over-engineered, but separated.</p>
+      </div>
+    </div>
+  </div>
+</div>

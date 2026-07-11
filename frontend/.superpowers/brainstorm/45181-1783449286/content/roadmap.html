@@ -1,0 +1,65 @@
+<h2>Improvement Roadmap</h2>
+<p class="subtitle">Prioritized phases for demo/pitch readiness — 4 weeks</p>
+
+<div class="section">
+  <h3>Phase 1 — Foundation (Week 1-2)</h3>
+  <p style="color:var(--text-secondary);margin-bottom:12px">Set up architecture so everything else builds cleanly on top.</p>
+  <div class="options">
+    <div class="option" data-choice="p1-state" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>State Management with Riverpod</h3>
+        <p>Provider-based architecture. Testable, scalable, modern Flutter standard.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="p1-persistence" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Local Persistence (Hive)</h3>
+        <p>Scan history, user preferences, offline cache. Fast NoSQL key-value store.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 2 — Backend & Community (Week 2-3)</h3>
+  <p style="color:var(--text-secondary);margin-bottom:12px">Firebase integration for real data and user accounts.</p>
+  <div class="options">
+    <div class="option" data-choice="p2-firebase" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Firebase Auth + Firestore</h3>
+        <p>Google sign-in, email auth, real-time database for community posts.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="p2-community" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">D</div>
+      <div class="content">
+        <h3>Live Community Feed</h3>
+        <p>Real posts, comments, likes. User profiles, expert badges, categories.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 3 — Weather & Analytics (Week 3-4)</h3>
+  <p style="color:var(--text-secondary);margin-bottom:12px">Enhance existing features with real data and deeper insights.</p>
+  <div class="options">
+    <div class="option" data-choice="p3-weather" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">E</div>
+      <div class="content">
+        <h3>Enhanced Weather Dashboard</h3>
+        <p>7-day forecast, farming alerts (frost, rain), historical data, soil conditions.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="p3-stats" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">F</div>
+      <div class="content">
+        <h3>Real Analytics Dashboard</h3>
+        <p>Scan history trends, field health over time, yield predictions, exportable reports.</p>
+      </div>
+    </div>
+  </div>
+</div>

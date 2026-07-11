@@ -152,8 +152,10 @@ web/dist/
 web/.astro/
 
 # Tooling Caches
-.superpowers/
-**/.superpowers/
+superpowers/
+**/superpowers/
+docs/superpowers/
+**/docs/superpowers/
 
 # dependencies
 node_modules/

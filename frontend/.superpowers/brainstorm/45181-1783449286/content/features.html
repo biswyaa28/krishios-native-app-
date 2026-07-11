@@ -1,0 +1,128 @@
+<h2>Feature Design Details</h2>
+<p class="subtitle">What each improvement includes</p>
+
+<div class="section">
+  <h3>Phase 1: Foundation</h3>
+  <div class="cards">
+    <div class="card" data-choice="f1-riverpod" onclick="toggleSelect(this)">
+      <div class="card-image" style="background:linear-gradient(135deg,#154212,#2D5A27);padding:24px;color:white;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">Riverpod</div>
+          <div style="opacity:0.8;font-size:14px">State Management</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Provider Setup</h3>
+        <p>WeatherProvider, CommunityProvider, StatsProvider. Auto-dispose, lazy loading, refresh support.</p>
+        <ul style="margin:8px 0;padding-left:20px;color:var(--text-secondary);font-size:14px">
+          <li>Replace all setState() with providers</li>
+          <li>Weather state with auto-refresh</li>
+          <li>Community feed with pagination</li>
+          <li>Scan history provider</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" data-choice="f1-hive" onclick="toggleSelect(this)">
+      <div class="card-image" style="background:linear-gradient(135deg,#7A5649,#FDCDBC);padding:24px;color:#2E150B;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">Hive</div>
+          <div style="opacity:0.8;font-size:14px">Local Database</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Offline Storage</h3>
+        <p>Type-safe boxes for scan results, user settings, and cached data.</p>
+        <ul style="margin:8px 0;padding-left:20px;color:var(--text-secondary);font-size:14px">
+          <li>ScanHistoryBox — past scan results</li>
+          <li>UserPrefsBox — settings, theme</li>
+          <li>WeatherCacheBox — last forecast</li>
+          <li>CommunityDraftsBox — offline posts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 2: Backend & Community</h3>
+  <div class="cards">
+    <div class="card" data-choice="f2-firebase" onclick="toggleSelect(this)">
+      <div class="card-image" style="background:linear-gradient(135deg,#FFA000,#FF6F00);padding:24px;color:white;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">Firebase</div>
+          <div style="opacity:0.8;font-size:14px">Backend as a Service</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Firebase Integration</h3>
+        <p>Google Sign-In, email auth, Firestore real-time database.</p>
+        <ul style="margin:8px 0;padding-left:20px;color:var(--text-secondary);font-size:14px">
+          <li>Google + email/password auth</li>
+          <li>User profile with role (farmer/expert)</li>
+          <li>Firestore collections: users, posts, comments</li>
+          <li>Security rules for data protection</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" data-choice="f2-community" onclick="toggleSelect(this)">
+      <div class="card-image" style="background:linear-gradient(135deg,#4F3500,#6C4A00);padding:24px;color:#FFB51E;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">Community</div>
+          <div style="opacity:0.8;font-size:14px">Live Feed</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Real Community Features</h3>
+        <p>Live posts, real-time comments, likes, expert verification.</p>
+        <ul style="margin:8px 0;padding-left:20px;color:var(--text-secondary);font-size:14px">
+          <li>Real-time post feed with Firestore streams</li>
+          <li>Image upload to Firebase Storage</li>
+          <li>Expert badge verification system</li>
+          <li>Push notifications for replies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 3: Weather & Analytics</h3>
+  <div class="cards">
+    <div class="card" data-choice="f3-weather" onclick="toggleSelect(this)">
+      <div class="card-image" style="background:linear-gradient(135deg,#1565C0,#0D47A1);padding:24px;color:white;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">Weather</div>
+          <div style="opacity:0.8;font-size:14px">Enhanced Dashboard</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Weather Enhancement</h3>
+        <p>Extended forecast, farming-specific alerts, soil data integration.</p>
+        <ul style="margin:8px 0;padding-left:20px;color:var(--text-secondary);font-size:14px">
+          <li>7-day forecast with daily high/low</li>
+          <li>Farming alerts: frost, heavy rain, heatwave</li>
+          <li>Historical weather trends (30-day)</li>
+          <li>Soil moisture recommendations</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" data-choice="f3-stats" onclick="toggleSelect(this)">
+      <div class="card-image" style="background:linear-gradient(135deg,#2E7D32,#1B5E20);padding:24px;color:white;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">Analytics</div>
+          <div style="opacity:0.8;font-size:14px">Yield Tracking</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Real Analytics</h3>
+        <p>Scan history trends, field health over time, exportable reports.</p>
+        <ul style="margin:8px 0;padding-left:20px;color:var(--text-secondary);font-size:14px">
+          <li>Historical scan charts (weekly/monthly)</li>
+          <li>Field health score tracking</li>
+          <li>Yield prediction based on scan data</li>
+          <li>Export reports as PDF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
