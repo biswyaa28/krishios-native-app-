@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/models/scan_result.dart';
+import '../../../scan/presentation/providers/scan_provider.dart';
+import '../health_chart.dart';
 import '../widgets/lifetime_scans_card.dart';
 import '../widgets/yield_efficiency_card.dart';
-import '../widgets/plant_health_chart.dart';
-import '../widgets/insights_section.dart';
+import '../widgets/stats_recommendations_section.dart';
 
-class StatsScreen extends StatelessWidget {
+class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final scans = ref.watch(scanHistoryProvider);
+    final avgHealth = ref.watch(averageHealthProvider);
+    final weeklyCount = ref.watch(weeklyScanCountProvider);
+    final lifetimeCount = scans.length;
+
     return ListView(
       padding: EdgeInsets.fromLTRB(16, 0, 16, 80 + bottomInset),
       children: [
@@ -58,17 +66,26 @@ class StatsScreen extends StatelessWidget {
           style: AppTextStyles.bodySm,
         ),
         const SizedBox(height: 16),
-        const Row(
+        Row(
           children: [
-            Expanded(child: LifetimeScansCard()),
-            SizedBox(width: 8),
-            Expanded(child: YieldEfficiencyCard()),
+            Expanded(
+              child: LifetimeScansCard(
+                lifetimeCount: lifetimeCount,
+                weeklyCount: weeklyCount,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: YieldEfficiencyCard(
+                healthScore: avgHealth,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        const PlantHealthChart(),
+        HealthChart(scans: scans.cast<ScanResult>()),
         const SizedBox(height: 16),
-        const InsightsSection(),
+        const StatsRecommendationsSection(),
       ],
     );
   }

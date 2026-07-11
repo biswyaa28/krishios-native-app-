@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class LifetimeScansCard extends StatelessWidget {
-  const LifetimeScansCard({super.key});
+  final int lifetimeCount;
+  final int weeklyCount;
+
+  const LifetimeScansCard({
+    super.key,
+    required this.lifetimeCount,
+    required this.weeklyCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +46,7 @@ class LifetimeScansCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text('142', style: AppTextStyles.headlineLgMobile),
+                      Text('$lifetimeCount', style: AppTextStyles.headlineLgMobile),
                       const SizedBox(width: 4),
                       Text('Completed', style: AppTextStyles.bodySm),
                     ],
@@ -53,7 +60,7 @@ class LifetimeScansCard extends StatelessWidget {
                       const Icon(Icons.trending_up,
                           size: 16, color: AppColors.primaryContainer),
                       const SizedBox(width: 4),
-                      Text('+12 this week', style: AppTextStyles.labelSm),
+                      Text('+$weeklyCount this week', style: AppTextStyles.labelSm),
                     ],
                   ),
                 ),

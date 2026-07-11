@@ -1,18 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:krishios/core/utils/formatters.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../features/scan/domain/models/chat_message.dart';
-import '../../../../features/scan/presentation/screens/scan_chat_screen.dart';
-import '../../data/models/mock_home_data.dart';
+import '../../../../shared/models/scan_result.dart';
+import '../../../scan/presentation/providers/scan_provider.dart';
+import '../../../scan/presentation/screens/scan_result_screen.dart';
+import '../../../scan/presentation/screens/scan_history_screen.dart';
 
-class RecentScansSection extends StatelessWidget {
+class RecentScansSection extends ConsumerWidget {
   const RecentScansSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scans = ref.watch(scanHistoryProvider);
+
+    if (scans.isEmpty) {
+      return const SizedBox.shrink(); // Hide section if no scans exist
+    }
+
+    final recentScans = scans.take(3).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Recent Scans', style: AppTextStyles.headlineMd),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Recent Scans', style: AppTextStyles.headlineMd),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ScanHistoryScreen()),
+                );
+              },
+              child: const Text('See All'),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
@@ -28,56 +53,10 @@ class RecentScansSection extends StatelessWidget {
           ),
           child: Column(
             children: [
-              ScanItem(
-                icon: Icons.eco,
-                iconBg: AppColors.surfaceContainer,
-                iconColor: AppColors.primary,
-                title: 'Wheat A-12',
-                subtitle: 'Healthy • Today, 08:30 AM',
-                onTap: () => _openChat(
-                  context,
-                  title: 'Wheat A-12',
-                  subtitle: 'Healthy • Today, 08:30 AM',
-                  icon: Icons.eco,
-                  iconBg: AppColors.surfaceContainer,
-                  iconColor: AppColors.primary,
-                  messages: mockMessagesWheat,
-                ),
-              ),
-              _divider(),
-              ScanItem(
-                icon: Icons.pest_control,
-                iconBg: AppColors.errorContainer,
-                iconColor: AppColors.error,
-                title: 'Corn B-04',
-                subtitle: 'Aphid Alert • Yesterday, 14:15',
-                onTap: () => _openChat(
-                  context,
-                  title: 'Corn B-04',
-                  subtitle: 'Aphid Alert • Yesterday, 14:15',
-                  icon: Icons.pest_control,
-                  iconBg: AppColors.errorContainer,
-                  iconColor: AppColors.error,
-                  messages: mockMessagesCorn,
-                ),
-              ),
-              _divider(),
-              ScanItem(
-                icon: Icons.storm,
-                iconBg: AppColors.surfaceContainer,
-                iconColor: AppColors.primary,
-                title: 'Soy C-01',
-                subtitle: 'Optimal Moisture • 2 days ago',
-                onTap: () => _openChat(
-                  context,
-                  title: 'Soy C-01',
-                  subtitle: 'Optimal Moisture • 2 days ago',
-                  icon: Icons.storm,
-                  iconBg: AppColors.surfaceContainer,
-                  iconColor: AppColors.primary,
-                  messages: mockMessagesSoy,
-                ),
-              ),
+              for (int i = 0; i < recentScans.length; i++) ...[
+                _buildScanItem(context, recentScans[i]),
+                if (i < recentScans.length - 1) _divider(),
+              ],
             ],
           ),
         ),
@@ -85,27 +64,27 @@ class RecentScansSection extends StatelessWidget {
     );
   }
 
-  void _openChat(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required List<ChatMessage> messages,
-  }) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ScanChatScreen(
-          title: title,
-          subtitle: subtitle,
-          icon: icon,
-          iconBg: iconBg,
-          iconColor: iconColor,
-          messages: messages,
-        ),
-      ),
+  Widget _buildScanItem(BuildContext context, ScanResult scan) {
+    final isHealthy = scan.diagnosis.toLowerCase().contains('healthy');
+    final icon = isHealthy ? Icons.eco : Icons.pest_control;
+    final iconBg = isHealthy ? AppColors.surfaceContainer : AppColors.errorContainer;
+    final iconColor = isHealthy ? AppColors.primary : AppColors.error;
+    final timestampText = Formatters.relativeTime(scan.scannedAt);
+
+    return ScanItem(
+      icon: icon,
+      iconBg: iconBg,
+      iconColor: iconColor,
+      title: '${scan.cropName} (${scan.fieldName})',
+      subtitle: '${scan.diagnosis} • $timestampText',
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ScanResultScreen(scan: scan),
+          ),
+        );
+      },
     );
   }
 

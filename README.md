@@ -1,104 +1,137 @@
-# KrishiOS - Offline-First AI Farming Assistant
+# KrishiOS Monorepo
+
+KrishiOS is a production-grade, offline-first AI farming assistant platform designed to assist smallholder farmers in remote areas. It leverages Edge Computer Vision (PyTorch/TorchScript) and FastAPI to diagnose crop diseases and suggest recovery steps entirely offline.
 
 ---
 
-## 1. Introduction
-
-KrishiOS is a mobile assistant application designed to assist smallholder farmers in remote areas. It leverages Computer Vision and Edge AI to diagnose crop diseases and suggest recovery steps entirely offline.
-
----
-
-## 2. Key Features
-
-* **Offline Disease Diagnosis:** Performs on-device image classification on leaf images using an optimized edge model (EfficientNet-B0) to detect 38 distinct crop states.
-* **Agricultural Weather Forecasts:** Fetches real-time localized current weather and precipitation forecasts using geolocator coordinates and the Open-Meteo REST API.
-* **Community Forum:** Enables farmers to share posts, comments, and advice locally with neighboring fields.
-* **Performance Analytics:** Provides custom circular gauges and health charts detailing crop yield analytics.
-
----
-
-## 3. Technology Stack
-
-* **Frontend:** Flutter stable (Dart)
-* **Edge AI:** ONNX Runtime / TensorFlow Lite (Inference)
-* **Training Core:** PyTorch (EfficientNet-B0 Backbone)
-* **Backend (Future):** FastAPI (Python) & PostgreSQL
+## 📸 App Showcase & Screenshots
+<p align="center">
+  <img src="Assets/Tagline.png" width="48%" alt="Tagline Page" />
+  <img src="Assets/HomePage.png" width="48%" alt="Home Dashboard" />
+</p>
+<p align="center">
+  <img src="Assets/Login%20Page.png" width="48%" alt="Auth Screen" />
+  <img src="Assets/How%20it%20works.png" width="48%" alt="How It Works" />
+</p>
+<p align="center">
+  <img src="Assets/Vision.png" width="98%" alt="Project Vision" />
+</p>
 
 ---
 
-## 4. Repository Structure
+## ⚡ Features
+*   **Edge AI Diagnostics**: Classifies crop leaf images locally using a PyTorch model compiled to TorchScript to diagnose 38 distinct plant-disease states.
+*   **Dynamic Geolocation Weather**: Emits real-time localized forecasts and warnings via the device GPS and Open-Meteo API.
+*   **Farmer Discussions**: Real-time forum threads powered by Cloud Firestore and secure cache caches.
+*   **Encrypted Offline Cache**: Uses AES-256 encrypted Hive local databases.
 
-```text
-KrishiOS/
-├── .github/             # Automated CI workflows and issue templates
-├── ai/                  # AI Model training (PyTorch code, configs, datasets)
-├── docs/                # Developer guides and OS setup files
-└── frontend/            # Flutter app (screens, themes, location services)
+---
+
+## 🛠️ Technology Stack
+*   **Frontend**: Flutter (Dart) using Riverpod State Management and Hive caches.
+*   **Backend**: FastAPI (Python) web server using Uvicorn.
+*   **Artificial Intelligence**: PyTorch CPU TorchScript models.
+*   **Cloud Infrastructure**: Firebase Auth, Firestore, and Storage.
+
+---
+
+## 🏛️ System Architecture
+
 ```
-For a detailed overview, see [docs/development/project-structure.md](docs/development/project-structure.md).
+[Flutter Mobile/Web Client] <---> [FastAPI REST Server] <---> [TorchScript Model]
+           |
+           +---> [Firebase Auth & Storage & Firestore]
+```
+
+For complete sequence diagrams, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
-## 5. Quick Start (Running Locally)
+## 📂 Project Directory structure
 
-### Prerequisites
-* Flutter SDK (Stable channel)
-* JDK 17
-* Android Studio / Xcode
-
-### Setup Flutter
-1. Navigate to the client directory:
-   ```bash
-   cd frontend
-   ```
-2. Download packages:
-   ```bash
-   flutter pub get
-   ```
-3. Run on a connected device/emulator:
-   ```bash
-   flutter run
-   ```
+```
+KrishiOS/
+│
+├── ai/                # AI model notebooks and weights
+├── backend/           # FastAPI REST API backend
+├── frontend/          # Flutter mobile application
+├── web/               # Vite-based HTML/CSS landing page
+├── docs/              # Detailed development documentation
+├── deployment/        # Docker and release build configs
+├── scripts/           # Maintenance scripts
+└── README.md          # Root repository readme
+```
 
 ---
 
-## 6. Documentation Index
+## 🚀 Quick Start (Running Locally)
 
-For detailed instructions, refer to our comprehensive documentation directory:
-* **Developer Setup:**
-  - [Windows Setup Guide](docs/installation/windows.md)
-  - [macOS Setup Guide](docs/installation/macos.md)
-  - [Linux Setup Guide](docs/installation/linux.md)
-  - [Android Target Guide](docs/installation/android.md)
-  - [iOS Target Guide](docs/installation/ios.md)
-* **Technical Guidelines:**
-  - [Architecture Design Details](docs/development/architecture.md)
-  - [Coding Standards & Styles](docs/development/coding-guidelines.md)
-  - [Git Branching & Pull Requests](docs/development/git-workflow.md)
-* **Distribution & Deployment:**
-  - [Android Packaging Guide](docs/deployment/android.md)
-  - [iOS Packaging Guide](docs/deployment/ios.md)
-  - [Release Guidelines](docs/deployment/release.md)
-* **Troubleshooting:**
-  - [Troubleshooting Common Compile Bugs](docs/installation/troubleshooting.md)
+### 1. Backend Server
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
 
----
+### 2. Vite Product Landing Page
+```bash
+cd web
+npm install
+npm run dev
+```
 
-## 7. Contributing
-
-We welcome contributions from the community! Please read our [Contributing Guidelines](docs/CONTRIBUTING.md) to get started.
-
----
-
-## 8. License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### 3. Flutter Client App
+```bash
+cd frontend
+flutter pub get
+flutter run
+```
 
 ---
 
-## 9. Core Team (4 Brains)
+## 💻 Platform Support & Limitations
 
-* **Sneha** (Team Leader) — [LinkedIn Profile](https://www.linkedin.com/in/)
-* **Biswajit** (AI Development) — [LinkedIn Profile](https://www.linkedin.com/in/)
-* **Paarshivi** (Frontend Development) — [LinkedIn Profile](https://www.linkedin.com/in/)
-* **Zoro** (AI Development & Backend Integration) — [LinkedIn Profile](https://www.linkedin.com/in/)
+| Platform | Diagnostic Inference | Community Forum | Weather Alerts | Offline Mode |
+| :--- | :--- | :--- | :--- | :--- |
+| **Android** | Supported (Real AI API) | Supported (Firestore) | Supported (GPS) | Supported (Hive Cache) |
+| **iOS** | Supported (Real AI API) | Supported (Firestore) | Supported (GPS) | Supported (Hive Cache) |
+| **Web** | Supported (CORS API) | Supported (Firestore) | Mock Coordinates | Supported (Browser Cache)|
+| **Desktop** | Supported (Local API) | Supported (Firestore) | Mock Coordinates | Supported (Hive Cache) |
+
+---
+
+## 📚 Technical Documentation Index
+
+Please consult the documents inside the `docs/` folder for comprehensive integration, code guidelines, and deployment specifications:
+
+| Document | Description | Path Link |
+| :--- | :--- | :--- |
+| **Installation Guide** | Walkthrough instructions for Windows, macOS, and Linux | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
+| **System Architecture** | Diagrams detailing backend request data flows | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| **Project Structure** | Monorepo directories index and descriptions | [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) |
+| **Developer Guidelines** | Clean architecture folders and Riverpod rules | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) |
+| **API Documentation** | REST HTTP request and response structures | [docs/API.md](docs/API.md) |
+| **Database Guide** | Cloud Firestore structures and Hive caches | [docs/DATABASE.md](docs/DATABASE.md) |
+| **AI System** | JIT compilation metrics and model parameters | [docs/AI.md](docs/AI.md) |
+| **Deployment Guide** | Compiling releases for APK/AAB and iOS | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| **Troubleshooting** | Solutions for camera, port, and emulator bugs | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+| **Roadmap** | Feature metrics and future enhancements | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| **Contribution Guide** | Guidelines for branch styles and PR structures | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) |
+| **Security Policy** | Security rules for storage bucket authorization | [docs/SECURITY.md](docs/SECURITY.md) |
+| **License Specification** | MIT License terms | [docs/LICENSE.md](docs/LICENSE.md) |
+| **FAQ** | 30 frequently asked developer questions | [docs/FAQ.md](docs/FAQ.md) |
+
+---
+
+## 👥 Core Team (4 Brains)
+*   **Sneha** (Team Leader)
+*   **Biswajit** (AI Development)
+*   **Paarshivi** (Frontend Development)
+*   **Zoro** (AI Development & Backend Integration)
+
+---
+
+## 📄 License
+This repository is licensed under the terms of the MIT License. See [docs/LICENSE.md](docs/LICENSE.md) for details.

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "307749770376",
+    "project_id": "krishios-c9e32",
+    "storage_bucket": "krishios-c9e32.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307749770376:android:236c1f7ae6ff3eb5ae7b3d",
+        "android_client_info": {
+          "package_name": "com.krishios.krishios"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEHoDHYr_1Lj2jrnWJulEmQNqmXKnZMFs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'gauge_painter.dart';
 
 class YieldEfficiencyCard extends StatelessWidget {
-  const YieldEfficiencyCard({super.key});
+  final double healthScore;
+
+  const YieldEfficiencyCard({super.key, required this.healthScore});
 
   @override
   Widget build(BuildContext context) {
+    final percentage = (healthScore * 100).round();
+    final label = percentage >= 80 ? 'Optimal' : percentage >= 60 ? 'Good' : percentage > 0 ? 'Fair' : 'N/A';
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -39,15 +45,15 @@ class YieldEfficiencyCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text('87%', style: AppTextStyles.headlineLgMobile),
+                      Text('$percentage%', style: AppTextStyles.headlineLgMobile),
                       const SizedBox(width: 4),
-                      Text('Optimal', style: AppTextStyles.bodySm),
+                      Text(label, style: AppTextStyles.bodySm),
                     ],
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Sector A performing above average.',
+                  healthScore > 0 ? 'Average health score across all scans.' : 'No scans recorded yet.',
                   style: AppTextStyles.labelSm,
                 ),
               ],
@@ -61,7 +67,7 @@ class YieldEfficiencyCard extends StatelessWidget {
               children: [
                 CustomPaint(
                   size: const Size(48, 48),
-                  painter: GaugePainter(progress: 0.87),
+                  painter: GaugePainter(progress: healthScore),
                 ),
                 const Icon(Icons.eco, color: AppColors.primary, size: 20),
               ],
@@ -71,42 +77,4 @@ class YieldEfficiencyCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class GaugePainter extends CustomPainter {
-  final double progress;
-
-  GaugePainter({required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 4;
-    const strokeWidth = 6.0;
-
-    final bgPaint = Paint()
-      ..color = AppColors.surfaceContainerHigh
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    final fgPaint = Paint()
-      ..color = AppColors.primary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, bgPaint);
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -1.5708,
-      6.28319 * progress,
-      false,
-      fgPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant GaugePainter oldDelegate) =>
-      oldDelegate.progress != progress;
 }

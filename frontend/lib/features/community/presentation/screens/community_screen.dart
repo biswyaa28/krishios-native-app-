@@ -1,46 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:krishios/shared/providers/auth_provider.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../domain/models/community_post.dart';
-import '../../data/models/mock_community_data.dart';
+import '../../../../shared/models/community_post.dart';
+import '../providers/community_provider.dart';
+import '../widgets/community_post_card.dart';
 import '../widgets/community_search_bar.dart';
 import '../widgets/category_chips.dart';
-import '../widgets/post_card.dart';
-import '../widgets/comments_sheet.dart';
-import '../widgets/share_sheet.dart';
 import 'post_detail_screen.dart';
 
-class CommunityScreen extends StatefulWidget {
+class CommunityScreen extends ConsumerStatefulWidget {
   const CommunityScreen({super.key});
 
   @override
-  State<CommunityScreen> createState() => _CommunityScreenState();
+  ConsumerState<CommunityScreen> createState() => _CommunityScreenState();
 }
 
-class _CommunityScreenState extends State<CommunityScreen> {
+class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   String _searchQuery = '';
-  String _selectedCategory = 'Trending';
-  final Set<String> _likedPosts = {};
   final TextEditingController _searchController = TextEditingController();
-  
-  late final List<CommunityPost> _allPosts = List.from(allPosts);
-  late final Map<String, int> _commentCounts = Map.from(commentCounts);
 
-  List<CommunityPost> get _filteredPosts {
-    var posts = _allPosts;
-    if (_selectedCategory != 'Trending') {
-      posts = posts.where((p) => p.category == _selectedCategory).toList();
-    }
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      posts = posts
-          .where((p) =>
-              p.title.toLowerCase().contains(query) ||
-              p.body.toLowerCase().contains(query) ||
-              p.name.toLowerCase().contains(query))
-          .toList();
-    }
-    return posts;
-  }
+  final List<String> _categories = [
+    'Trending',
+    'Rice Farmers',
+    'Pest Control',
+    'New Tech',
+    'Soil Health',
+  ];
 
   @override
   void dispose() {
@@ -51,7 +38,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
-    final posts = _filteredPosts;
+    final postsAsync = ref.watch(postsProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
 
     return Stack(
       children: [
@@ -100,40 +88,61 @@ class _CommunityScreenState extends State<CommunityScreen> {
             ),
             const SizedBox(height: 16),
             CategoryChips(
-              categories: categoriesList,
-              selected: _selectedCategory,
-              onSelected: (cat) => setState(() => _selectedCategory = cat),
+              categories: _categories,
+              selected: selectedCategory,
+              onSelected: (cat) =>
+                  ref.read(selectedCategoryProvider.notifier).state = cat,
             ),
             const SizedBox(height: 20),
-            if (posts.isEmpty)
-              Padding(
+            postsAsync.when(
+              data: (posts) {
+                final filtered = _applySearch(posts);
+                if (filtered.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 48),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 48,
+                              color: AppColors.onSurfaceVariant
+                                  .withValues(alpha: 0.5)),
+                          const SizedBox(height: 12),
+                          Text('No posts found',
+                              style: AppTextStyles.bodyMd.copyWith(
+                                  color: AppColors.onSurfaceVariant)),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return Column(
+                  children: filtered
+                      .map(
+                        (post) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: PostCard(
+                            post: post,
+                            onTap: () => _openPostDetail(context, post),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.only(top: 48),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => Padding(
                 padding: const EdgeInsets.only(top: 48),
                 child: Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.search_off,
-                          size: 48, color: AppColors.onSurfaceVariant.withValues(alpha: 0.5)),
-                      const SizedBox(height: 12),
-                      Text('No posts found',
-                          style: AppTextStyles.bodyMd.copyWith(
-                              color: AppColors.onSurfaceVariant)),
-                    ],
-                  ),
+                  child: Text('Error loading posts: $e',
+                      style: AppTextStyles.bodyMd
+                          .copyWith(color: AppColors.error)),
                 ),
-              )
-            else
-              ...posts.map((post) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: PostCard(
-                      post: post,
-                      isLiked: _likedPosts.contains(post.id),
-                      commentCount: _commentCounts[post.id] ?? 0,
-                      onLike: () => _toggleLike(post.id),
-                      onComment: () => _showComments(context, post),
-                      onShare: post.hasShare ? () => _showShareSheet(context, post) : null,
-                      onTap: () => _openPostDetail(context, post),
-                    ),
-                  )),
+              ),
+            ),
           ],
         ),
         Positioned(
@@ -157,55 +166,30 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  void _toggleLike(String postId) {
-    setState(() {
-      if (_likedPosts.contains(postId)) {
-        _likedPosts.remove(postId);
-      } else {
-        _likedPosts.add(postId);
-      }
-    });
-  }
-
-  void _showComments(BuildContext context, CommunityPost post) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => CommentsSheet(
-        postId: post.id,
-        postTitle: post.title,
-        onCommentAdded: () {
-          setState(() {
-            _commentCounts[post.id] = (_commentCounts[post.id] ?? 0) + 1;
-          });
-        },
-      ),
-    );
-  }
-
-  void _showShareSheet(BuildContext context, CommunityPost post) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => ShareSheet(post: post),
-    );
+  List<CommunityPost> _applySearch(List<CommunityPost> posts) {
+    if (_searchQuery.isEmpty) return posts;
+    final query = _searchQuery.toLowerCase();
+    return posts
+        .where((p) =>
+            p.title.toLowerCase().contains(query) ||
+            p.body.toLowerCase().contains(query) ||
+            p.authorName.toLowerCase().contains(query))
+        .toList();
   }
 
   void _openPostDetail(BuildContext context, CommunityPost post) {
+    final likedPosts = ref.read(likedPostsProvider);
+    final isLiked = likedPosts.contains(post.id);
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PostDetailScreen(
           post: post,
-          isLiked: _likedPosts.contains(post.id),
-          commentCount: _commentCounts[post.id] ?? 0,
-          onLike: () => _toggleLike(post.id),
-          onComment: () => _showComments(context, post),
+          isLiked: isLiked,
+          onLike: () => ref
+              .read(communityRepositoryProvider)
+              .toggleLike(post.id, isLiked),
         ),
       ),
     );
@@ -214,7 +198,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
   void _showCreatePost(BuildContext context) {
     final titleController = TextEditingController();
     final bodyController = TextEditingController();
-    String selectedCategory = categoriesList[0];
+    String selectedCategory = _categories[0];
 
     showModalBottomSheet(
       context: context,
@@ -246,10 +230,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: selectedCategory,
-              items: categoriesList
+              items: _categories
                   .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                   .toList(),
-              onChanged: (v) => selectedCategory = v ?? categoriesList[0],
+              onChanged: (v) => selectedCategory = v ?? _categories[0],
               decoration: InputDecoration(
                 labelText: 'Category',
                 border: OutlineInputBorder(
@@ -320,23 +304,26 @@ class _CommunityScreenState extends State<CommunityScreen> {
     required String body,
   }) {
     if (title.isEmpty || body.isEmpty) return;
+    
+    final profile = ref.read(userProfileProvider).value;
+    final user = FirebaseAuth.instance.currentUser;
+    
+    final authorId = profile?.uid ?? user?.uid ?? 'guest-user';
+    final authorName = profile?.name ?? user?.displayName ?? 'Farmer';
+    final authorRole = profile?.role ?? 'Farmer';
+    final authorAvatar = profile?.avatarUrl;
+
     final newPost = CommunityPost(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: 'You',
-      role: 'Farmer',
-      time: 'Just now',
-      isImageAvatar: false,
-      initials: 'YO',
+      id: '',
+      authorId: authorId,
+      authorName: authorName,
+      authorRole: authorRole,
+      authorAvatar: authorAvatar,
       title: title,
       body: body,
-      hasImage: false,
-      hasShare: true,
-      isExpert: false,
       category: category,
+      createdAt: DateTime.now(),
     );
-    setState(() {
-      _allPosts.insert(0, newPost);
-      _commentCounts[newPost.id] = 0;
-    });
+    ref.read(communityRepositoryProvider).createPost(newPost);
   }
 }

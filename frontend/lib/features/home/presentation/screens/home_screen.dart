@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../widgets/weather_card.dart';
+import '../../../weather/presentation/widgets/weather_alerts.dart';
+import '../../../weather/presentation/widgets/weather_card.dart';
+import '../../../weather/presentation/widgets/forecast_card.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 import '../widgets/recent_scans_section.dart';
 import '../widgets/recommended_actions_section.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     return ListView(
       padding: EdgeInsets.fromLTRB(16, 0, 16, 80 + bottomInset),
@@ -45,6 +49,17 @@ class HomeScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.account_circle_outlined, color: AppColors.primary, size: 28),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                        );
+                      },
+                      tooltip: 'My Profile',
+                    ),
                   ],
                 ),
               ),
@@ -52,7 +67,11 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        const WeatherAlerts(),
+        const SizedBox(height: 16),
         const WeatherCard(),
+        const SizedBox(height: 16),
+        const ForecastCard(),
         const SizedBox(height: 24),
         const RecentScansSection(),
         const SizedBox(height: 24),
