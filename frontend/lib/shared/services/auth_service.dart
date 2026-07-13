@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,7 +50,11 @@ class AuthService {
 
   Future<void> signOut() async {
     if (!Platform.isMacOS && !Platform.isWindows && !Platform.isLinux) {
-      try { await GoogleSignIn().signOut(); } catch (_) {}
+      try {
+        await GoogleSignIn().signOut();
+      } catch (e) {
+        debugPrint('[WARNING] Google sign-out failed: $e');
+      }
     }
     await _auth.signOut();
   }

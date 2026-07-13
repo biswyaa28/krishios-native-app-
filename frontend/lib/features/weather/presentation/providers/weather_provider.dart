@@ -1,12 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:krishios/core/constants/api_constants.dart';
 import 'package:krishios/shared/models/weather.dart';
 import 'package:krishios/shared/models/weather_forecast.dart';
 import '../../data/weather_repository.dart';
 
 final weatherRepositoryProvider = Provider<WeatherRepository>((ref) {
-  return WeatherRepository();
+  final repo = WeatherRepository();
+  ref.onDispose(() => repo.dispose());
+  return repo;
 });
 
 final locationNameProvider = StateProvider<String?>((ref) => null);
@@ -15,7 +18,7 @@ final positionProvider = FutureProvider<Position?>((ref) async {
   try {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ref.read(locationNameProvider.notifier).state = 'Patna, Bihar (Fallback)';
+      ref.read(locationNameProvider.notifier).state = ApiConstants.fallbackLocationName;
       return null;
     }
 
@@ -23,16 +26,18 @@ final positionProvider = FutureProvider<Position?>((ref) async {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        ref.read(locationNameProvider.notifier).state = 'Patna, Bihar (Fallback)';
+        ref.read(locationNameProvider.notifier).state = ApiConstants.fallbackLocationName;
         return null;
       }
     }
     if (permission == LocationPermission.deniedForever) {
-      ref.read(locationNameProvider.notifier).state = 'Patna, Bihar (Fallback)';
+      ref.read(locationNameProvider.notifier).state = ApiConstants.fallbackLocationName;
       return null;
     }
 
-    final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
+    final pos = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+    );
     
     // Reverse geocode to retrieve city/state names
     try {

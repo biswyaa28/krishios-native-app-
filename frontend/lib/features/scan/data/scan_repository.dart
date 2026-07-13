@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:krishios/shared/models/scan_result.dart';
@@ -47,7 +48,7 @@ class ScanRepository {
           'userId': user.uid,
         });
       } catch (e) {
-        print('[ERROR] Failed to save scan to Firestore: $e');
+        debugPrint('[ERROR] Failed to save scan to Firestore: $e');
       }
     }
   }
@@ -67,7 +68,9 @@ class ScanRepository {
             .collection('scans')
             .doc(id)
             .delete();
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('[ERROR] Failed to delete scan from Firestore: $e');
+      }
     }
   }
 
@@ -94,7 +97,9 @@ class ScanRepository {
           .get();
 
       final box = HiveService.getScanHistoryBox();
+      final localIds = box.keys.cast<String>().toSet();
       for (final doc in snapshot.docs) {
+        if (localIds.contains(doc.id)) continue;
         final data = doc.data();
         final scan = ScanResult(
           id: doc.id,
@@ -112,6 +117,8 @@ class ScanRepository {
         );
         await box.put(scan.id, scan);
       }
-    } catch (_) {}
+      } catch (e) {
+        debugPrint('[ERROR] Failed to sync scans from Firestore: $e');
+      }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
-class CommunitySearchBar extends StatelessWidget {
+class CommunitySearchBar extends StatefulWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -10,6 +10,33 @@ class CommunitySearchBar extends StatelessWidget {
     required this.controller,
     required this.onChanged,
   });
+
+  @override
+  State<CommunitySearchBar> createState() => _CommunitySearchBarState();
+}
+
+class _CommunitySearchBarState extends State<CommunitySearchBar> {
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onTextChanged);
+    _hasText = widget.controller.text.isNotEmpty;
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    final empty = widget.controller.text.isEmpty;
+    if (_hasText == empty) {
+      setState(() => _hasText = !empty);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +56,8 @@ class CommunitySearchBar extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
-              controller: controller,
-              onChanged: onChanged,
+              controller: widget.controller,
+              onChanged: widget.onChanged,
               decoration: const InputDecoration(
                 hintText: 'Search topics, farmers, or advice...',
                 hintStyle: TextStyle(
@@ -44,12 +71,12 @@ class CommunitySearchBar extends StatelessWidget {
               ),
             ),
           ),
-          if (controller.text.isNotEmpty)
+          if (_hasText)
             IconButton(
               icon: const Icon(Icons.clear, size: 18),
               onPressed: () {
-                controller.clear();
-                onChanged('');
+                widget.controller.clear();
+                widget.onChanged('');
               },
             ),
         ],

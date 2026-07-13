@@ -53,6 +53,18 @@ class AppColors {
   static const inverseSurface = Color(0xFF2E312E);
   static const inverseOnSurface = Color(0xFFEFF1EC);
   static const inversePrimary = Color(0xFFA1D494);
+
+  // Dark theme colors
+  static const darkScaffoldBackground = Color(0xFF0E1310);
+  static const darkSurface = Color(0xFF1A1E1A);
+  static const darkOnSurface = Color(0xFFE2E3DE);
+  static const darkSurfaceContainerHighest = Color(0xFF2D322D);
+  static const darkOnPrimary = Color(0xFF0A3A08);
+  static const darkOnSecondary = Color(0xFF442A1E);
+  static const darkOnTertiary = Color(0xFF3D2800);
+  static const darkError = Color(0xFFFFB4AB);
+  static const darkOnError = Color(0xFF690005);
+  static const darkOutline = Color(0xFF8C9386);
 }
 
 class AppTextStyles {
@@ -170,6 +182,68 @@ class AppTheme {
           }
           return const IconThemeData(
             color: AppColors.onSurfaceVariant,
+          );
+        }),
+      ),
+    );
+  }
+
+  static ThemeData get dark {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.darkScaffoldBackground,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.inversePrimary,
+        onPrimary: AppColors.darkOnPrimary,
+        primaryContainer: AppColors.onPrimaryFixedVariant,
+        onPrimaryContainer: AppColors.primaryFixed,
+        secondary: AppColors.secondaryFixedDim,
+        onSecondary: AppColors.darkOnSecondary,
+        secondaryContainer: AppColors.onSecondaryFixedVariant,
+        onSecondaryContainer: AppColors.secondaryContainer,
+        tertiary: AppColors.tertiaryFixedDim,
+        onTertiary: AppColors.darkOnTertiary,
+        tertiaryContainer: AppColors.tertiaryContainer,
+        onTertiaryContainer: AppColors.tertiaryFixed,
+        error: AppColors.darkError,
+        onError: AppColors.darkOnError,
+        errorContainer: AppColors.onErrorContainer,
+        onErrorContainer: AppColors.errorContainer,
+        surface: AppColors.darkSurface,
+        onSurface: AppColors.darkOnSurface,
+        surfaceContainerHighest: AppColors.darkSurfaceContainerHighest,
+        onSurfaceVariant: AppColors.outlineVariant,
+        outline: AppColors.darkOutline,
+        outlineVariant: AppColors.onSurfaceVariant,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.darkSurface,
+        foregroundColor: AppColors.darkOnSurface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.darkSurface,
+        indicatorColor: AppColors.onPrimaryFixedVariant,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppTextStyles.labelSm.copyWith(
+              color: AppColors.primaryFixed,
+            );
+          }
+          return AppTextStyles.labelSm.copyWith(
+            color: AppColors.outlineVariant,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(
+              color: AppColors.primaryFixed,
+            );
+          }
+          return const IconThemeData(
+            color: AppColors.outlineVariant,
           );
         }),
       ),

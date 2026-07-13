@@ -6,16 +6,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'scan_result_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/scan_result.dart';
-import 'scan_result_screen.dart';
 import '../../presentation/providers/scan_provider.dart';
 import '../../../weather/presentation/providers/weather_provider.dart';
 import '../widgets/corner_bracket.dart';
 import '../widgets/scanning_line.dart';
+import '../../data/treatment_data.dart';
 
 class CropScanScreen extends ConsumerStatefulWidget {
   const CropScanScreen({super.key});
@@ -30,15 +35,28 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
   bool _isCameraInitialized = false;
   bool _isProcessing = false;
   String _statusMessage = '';
+  String? _cameraError;
 
   @override
   void initState() {
     super.initState();
-    _initCamera();
+    _initCameraWithPermission();
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initCameraWithPermission() async {
+    if (!await _requestCameraPermission()) return;
+    await _initCamera();
   }
 
   Future<void> _initCamera() async {
     try {
+      _cameraError = null;
       _cameras = await availableCameras();
       if (_cameras.isNotEmpty) {
         _controller = CameraController(
@@ -54,14 +72,13 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
         }
       }
     } catch (e) {
-      print('[WARNING] Camera could not initialize: $e');
+      debugPrint('[WARNING] Camera could not initialize: $e');
+      if (mounted) {
+        setState(() {
+          _cameraError = e.toString();
+        });
+      }
     }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
   }
 
   Future<void> _processImage(String imagePath) async {
@@ -88,7 +105,7 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
         await storageRef.putFile(imageFile);
         downloadUrl = await storageRef.getDownloadURL();
       } catch (e) {
-        print('[WARNING] Firebase Storage upload failed: $e. Using local path.');
+        debugPrint('[WARNING] Firebase Storage upload failed: $e. Using local path.');
         downloadUrl = imagePath;
       }
 
@@ -99,50 +116,45 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
       // 2. Fetch Geolocation
       double? lat;
       double? lon;
-      try {
-        final posAsync = ref.read(positionProvider);
-        final pos = posAsync.value;
-        if (pos != null) {
-          lat = pos.latitude;
-          lon = pos.longitude;
-        }
-      } catch (_) {}
+      final posAsync = ref.read(positionProvider);
+      if (posAsync is AsyncData<Position?> && posAsync.value != null) {
+        lat = posAsync.value!.latitude;
+        lon = posAsync.value!.longitude;
+      }
 
       // 3. Call AI REST API Backend
-      String diagnosis = 'Tomato Healthy';
-      double confidence = 0.985;
-      
-      // Determine backend host (10.0.2.2 for Android Emulator, localhost for iOS/desktop)
-      final host = (defaultTargetPlatform == TargetPlatform.android) ? '10.0.2.2' : 'localhost';
-      final uri = Uri.parse('http://$host:8080/predict');
+      String diagnosis = 'Unknown';
+      double confidence = 0.0;
+      double? healthScore;
+
+      final override = ApiConstants.overrideHost;
+      final host = override ?? (defaultTargetPlatform == TargetPlatform.android ? '10.0.2.2' : 'localhost');
+      final uri = Uri.parse(ApiConstants.scanBaseUrl.replaceFirst('localhost', host)).replace(path: '/predict');
 
       try {
         final request = http.MultipartRequest('POST', uri)
-          ..files.add(await http.MultipartFile.fromPath('file', imagePath));
+          ..files.add(await http.MultipartFile.fromPath('file', imagePath, contentType: MediaType('image', 'jpeg')));
 
-        final streamedResponse = await request.send().timeout(const Duration(seconds: 8));
+        final streamedResponse = await request.send().timeout(const Duration(seconds: 12));
         final response = await http.Response.fromStream(streamedResponse);
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
           diagnosis = data['prediction'] ?? 'Unknown crop state';
-          confidence = (data['confidence'] as num?)?.toDouble() ?? 1.0;
+          confidence = (data['confidence'] as num?)?.toDouble() ?? 0.0;
+          healthScore = (data['health_score'] as num?)?.toDouble();
         } else {
           throw Exception('Status code: ${response.statusCode}');
         }
       } catch (e) {
-        print('[WARNING] AI API host unreachable: $e. Falling back to local offline classification.');
-        // Parse local fallback matching the PlantVillage structure
-        if (imagePath.toLowerCase().contains('tomato')) {
-          diagnosis = 'Tomato Late Blight';
-          confidence = 0.914;
-        } else if (imagePath.toLowerCase().contains('corn')) {
-          diagnosis = 'Corn Common Rust';
-          confidence = 0.887;
-        } else {
-          diagnosis = 'Tomato Healthy';
-          confidence = 0.952;
+        debugPrint('[WARNING] AI API host unreachable: $e.');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not reach AI backend. Ensure the server is running.')),
+          );
         }
+        setState(() => _isProcessing = false);
+        return;
       }
 
       // Extract crop classification
@@ -150,24 +162,22 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
       final cropName = words.isNotEmpty ? words.first : 'Crop';
       final disease = words.length > 1 ? words.sublist(1).join(' ') : 'Healthy';
 
-      // Standard treatment directory maps
-      String treatment = 'Ensure proper nitrogen soil balance and inspect foliage watering schedules.';
-      if (disease.toLowerCase().contains('late blight')) {
-        treatment = 'Apply copper-based fungicides immediately. Prune lower infected leaves and keep foliage dry.';
-      } else if (disease.toLowerCase().contains('common rust')) {
-        treatment = 'Spray sulfur or copper fungicides. Destroy infected crop residues post-harvest.';
-      } else if (disease.toLowerCase().contains('scab')) {
-        treatment = 'Apply lime sulfur or captan fungicides. Rake and destroy fallen leaves to clean soils.';
-      } else if (disease.toLowerCase().contains('healthy')) {
-        treatment = 'Crop displays optimal cell structures. Maintain current watering and fertilizing cycles.';
+      // Treatment lookup by disease name
+
+      String treatment = 'Inspect plant thoroughly. Isolate if symptoms worsen. Consult local extension service.';
+      for (final entry in treatmentMap.entries) {
+        if (disease.toLowerCase().contains(entry.key)) {
+          treatment = entry.value;
+          break;
+        }
       }
 
       final scanResult = ScanResult(
         id: scanId,
         cropName: cropName,
-        fieldName: 'Main Field',
+        fieldName: 'Unnamed Field',
         diagnosis: disease,
-        healthScore: disease.toLowerCase().contains('healthy') ? 100.0 : (1.0 - confidence) * 100.0,
+        healthScore: healthScore ?? (disease.toLowerCase().contains('healthy') ? 100.0 : (1.0 - confidence) * 100.0),
         scannedAt: DateTime.now(),
         imagePath: downloadUrl,
         confidence: confidence,
@@ -209,15 +219,39 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
     }
   }
 
+  Future<bool> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (status.isGranted) return true;
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Camera permission is required to capture photos.')),
+      );
+    }
+    return false;
+  }
+
   Future<void> _capturePhoto() async {
-    if (_controller == null || !_controller!.value.isInitialized) return;
+    if (!await _requestCameraPermission()) return;
+    if (_controller == null || !_controller!.value.isInitialized) {
+      await _initCamera();
+      if (_controller == null || !_controller!.value.isInitialized) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Camera not available. Please try gallery.')),
+          );
+        }
+        return;
+      }
+    }
     try {
       final XFile file = await _controller!.takePicture();
       await _processImage(file.path);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Camera capture error: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Camera capture error: $e')),
+        );
+      }
     }
   }
 
@@ -229,9 +263,11 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
         await _processImage(file.path);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gallery selection error: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gallery selection error: $e')),
+        );
+      }
     }
   }
 
@@ -310,10 +346,25 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
                                             color: Colors.white.withValues(alpha: 0.3)),
                                         const SizedBox(height: 8),
                                         Text(
-                                          'Camera preview unavailable. Please use gallery.',
+                                          _cameraError != null
+                                              ? 'Camera error: $_cameraError'
+                                              : 'Camera preview unavailable. Please use gallery.',
                                           style: AppTextStyles.labelMd
                                               .copyWith(color: Colors.white54),
+                                          textAlign: TextAlign.center,
                                         ),
+                                        if (_cameraError != null) ...[
+                                          const SizedBox(height: 16),
+                                          OutlinedButton.icon(
+                                            onPressed: _initCamera,
+                                            icon: const Icon(Icons.refresh, size: 18),
+                                            label: const Text('Retry'),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor: Colors.white,
+                                              side: const BorderSide(color: Colors.white54),
+                                            ),
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ),

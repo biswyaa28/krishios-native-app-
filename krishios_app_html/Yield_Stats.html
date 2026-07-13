@@ -1,0 +1,325 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>AgriTech Pro - Stats &amp; Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#ebbcac",
+                        "surface-tint": "#3b6934",
+                        "surface-bright": "#f8faf5",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#6c4a00",
+                        "surface-container-high": "#e7e9e4",
+                        "surface-dim": "#d8dbd6",
+                        "on-secondary-fixed": "#2e150b",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#795548",
+                        "tertiary-fixed-dim": "#ffba38",
+                        "surface": "#f8faf5",
+                        "outline-variant": "#c2c9bb",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#9dd090",
+                        "on-background": "#191c1a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#a1d494",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "inverse-on-surface": "#eff1ec",
+                        "tertiary": "#4f3500",
+                        "secondary": "#7a5649",
+                        "on-tertiary-fixed": "#281900",
+                        "inverse-surface": "#2e312e",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#603f33",
+                        "inverse-primary": "#a1d494",
+                        "surface-container-highest": "#e1e3de",
+                        "on-primary-fixed": "#002201",
+                        "surface-variant": "#e1e3de",
+                        "outline": "#72796e",
+                        "primary-container": "#2d5a27",
+                        "surface-container-low": "#f2f4ef",
+                        "background": "#f8faf5",
+                        "secondary-container": "#fdcdbc",
+                        "surface-container": "#ecefea",
+                        "on-surface": "#191c1a",
+                        "on-surface-variant": "#42493e",
+                        "tertiary-fixed": "#ffdeac",
+                        "secondary-fixed": "#ffdbcf",
+                        "on-primary-fixed-variant": "#23501e",
+                        "primary": "#154212",
+                        "primary-fixed": "#bcf0ae",
+                        "on-tertiary-container": "#ffb51e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-tablet": "24px",
+                        "touch-target-min": "48px",
+                        "gutter": "16px",
+                        "base": "8px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .agri-shadow {
+            box-shadow: 0 4px 8px rgba(45, 90, 39, 0.08);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Simple bar chart styles for visualization */
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 120px;
+            padding-bottom: 24px;
+            position: relative;
+        }
+        .bar {
+            flex: 1;
+            background-color: #2d5a27;
+            border-radius: 4px 4px 0 0;
+            min-width: 12px;
+            transition: height 0.5s ease;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #42493e;
+            transform: translateX(-50%);
+            left: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md h-full flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-40 bg-surface dark:bg-surface-dim shadow-sm shadow-[0_4px_8px_rgba(45,90,39,0.08)] flex items-center justify-between px-margin-mobile h-[64px]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="agriculture">agriculture</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">KrishiOS</h1>
+</div>
+<div class="flex items-center gap-2">
+<!-- Add context-specific header actions if needed, though JSON doesn't specify trailing icons -->
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto pb-[96px] pt-4 px-margin-mobile md:px-margin-tablet grid grid-cols-4 md:grid-cols-8 gap-gutter md:max-w-7xl md:mx-auto w-full">
+<!-- Header Section -->
+<div class="col-span-4 md:col-span-8 mb-2">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Yield &amp; Analytics</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Overview of farm health and performance metrics.</p>
+</div>
+<!-- Lifetime Diagnosis Counter (Bento item 1) -->
+<div class="col-span-4 md:col-span-4 bg-surface-container-lowest rounded-xl p-4 agri-shadow flex items-center justify-between">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Lifetime Scans</p>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">142</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Completed</span>
+</div>
+<div class="flex items-center gap-1 mt-2 text-primary-container">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+<span class="font-label-sm text-label-sm">+12 this week</span>
+</div>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container filled-icon" data-icon="shutter_speed">shutter_speed</span>
+</div>
+</div>
+<!-- Yield Efficiency Gauge (Bento item 2) -->
+<div class="col-span-4 md:col-span-4 bg-surface-container-lowest rounded-xl p-4 agri-shadow flex items-center justify-between">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Yield Efficiency</p>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">87%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Optimal</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-2">Sector A performing above average.</p>
+</div>
+<!-- Simple CSS Gauge -->
+<div class="relative w-16 h-16">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="87, 100" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary filled-icon text-[20px]" data-icon="eco">eco</span>
+</div>
+</div>
+</div>
+<!-- Plant Health Trends Chart -->
+<div class="col-span-4 md:col-span-8 bg-surface-container-lowest rounded-xl p-4 agri-shadow">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">Plant Health Trends</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">30-day index based on scan data</p>
+</div>
+<button class="font-label-sm text-label-sm text-primary flex items-center gap-1 hover:bg-surface-container-high px-2 py-1 rounded transition-colors">
+                    Filter <span class="material-symbols-outlined text-[16px]" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+<!-- Mock Chart -->
+<div class="bar-container border-b border-surface-container-high">
+<div class="relative flex flex-col items-center flex-1 h-full justify-end group">
+<div class="bar w-full max-w-[24px] mx-auto rounded-t bg-primary-fixed-dim" style="height: 40%"></div>
+<span class="bar-label font-label-sm text-label-sm">W1</span>
+<div class="absolute bottom-full mb-2 hidden group-hover:block bg-inverse-surface text-inverse-on-surface text-xs rounded px-2 py-1 z-10 whitespace-nowrap">Index: 65</div>
+</div>
+<div class="relative flex flex-col items-center flex-1 h-full justify-end group">
+<div class="bar w-full max-w-[24px] mx-auto rounded-t bg-primary-fixed-dim" style="height: 55%"></div>
+<span class="bar-label font-label-sm text-label-sm">W2</span>
+</div>
+<div class="relative flex flex-col items-center flex-1 h-full justify-end group">
+<div class="bar w-full max-w-[24px] mx-auto rounded-t bg-primary" style="height: 75%"></div>
+<span class="bar-label font-label-sm text-label-sm">W3</span>
+</div>
+<div class="relative flex flex-col items-center flex-1 h-full justify-end group">
+<div class="bar w-full max-w-[24px] mx-auto rounded-t bg-primary" style="height: 85%"></div>
+<span class="bar-label font-label-sm text-label-sm">W4</span>
+</div>
+</div>
+</div>
+<!-- Actionable Insights List -->
+<div class="col-span-4 md:col-span-8 bg-surface-container-lowest rounded-xl agri-shadow overflow-hidden">
+<div class="p-4 border-b border-outline-variant/30 bg-surface">
+<h3 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="lightbulb">lightbulb</span>
+                    Top Recommendations to Improve Yield
+                </h3>
+</div>
+<div class="divide-y divide-outline-variant/30">
+<!-- Insight 1 -->
+<div class="p-4 hover:bg-surface-container-lowest transition-colors flex gap-4 items-start cursor-pointer active:scale-[0.99]">
+<div class="w-10 h-10 rounded bg-error-container flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-error" data-icon="science">science</span>
+</div>
+<div class="flex-1">
+<h4 class="font-label-md text-label-md text-on-surface">Increase Nitrogen in Sector B</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Recent scans indicate mild chlorosis. A targeted nitrogen application is recommended within 48 hours to prevent yield loss.</p>
+<div class="flex gap-2 mt-3">
+<button class="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-4 py-2 rounded-lg min-h-[36px] flex items-center justify-center hover:bg-primary transition-colors">
+                                Schedule Task
+                            </button>
+</div>
+</div>
+</div>
+<!-- Insight 2 -->
+<div class="p-4 hover:bg-surface-container-lowest transition-colors flex gap-4 items-start cursor-pointer active:scale-[0.99]">
+<div class="w-10 h-10 rounded bg-secondary-container flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="water_drop">water_drop</span>
+</div>
+<div class="flex-1">
+<h4 class="font-label-md text-label-md text-on-surface">Optimize Irrigation Cycle</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Soil moisture levels in Zone 3 are dropping faster than expected. Consider adjusting irrigation duration.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only based on layout logic, though hidden md:flex rules usually apply, JSON structural logic dictates placement) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container dark:bg-surface-container-low border-t border-outline-variant shadow-[0_-4px_8px_rgba(45,90,39,0.08)] flex justify-around items-center h-[80px] pb-safe md:hidden">
+<!-- Inactive: Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 active:scale-90 transition-transform duration-200 rounded-lg p-2 min-w-[64px] min-h-[touch-target-min]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<!-- Inactive: Community -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 active:scale-90 transition-transform duration-200 rounded-lg p-2 min-w-[64px] min-h-[touch-target-min]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="font-label-sm text-label-sm">Community</span>
+</a>
+<!-- Inactive: Scan -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 active:scale-90 transition-transform duration-200 rounded-lg p-2 min-w-[64px] min-h-[touch-target-min]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="shutter_speed">shutter_speed</span>
+<span class="font-label-sm text-label-sm">Scan</span>
+</a>
+<!-- Active: Stats (Matches Intent: Yield and diagnosis analytics) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-1 active:scale-90 transition-transform duration-200 min-h-[touch-target-min]" href="#">
+<span class="material-symbols-outlined mb-1 filled-icon" data-icon="query_stats">query_stats</span>
+<span class="font-label-sm text-label-sm">Stats</span>
+</a>
+</nav>
+<!-- Desktop Side Nav (Visible only on md+) -> Implementing Semantic Shell Mandate for Responsive Pivot -->
+<nav class="hidden md:flex flex-col fixed left-0 top-[64px] h-[calc(100vh-64px)] w-[80px] bg-surface-container border-r border-outline-variant/30 z-30 py-4 gap-4 items-center">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 rounded-lg p-2 w-[64px] h-[64px]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 rounded-lg p-2 w-[64px] h-[64px]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="font-label-sm text-[10px]">Community</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 rounded-lg p-2 w-[64px] h-[64px]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="shutter_speed">shutter_speed</span>
+<span class="font-label-sm text-[10px]">Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-lg p-2 w-[64px] h-[64px]" href="#">
+<span class="material-symbols-outlined mb-1 filled-icon" data-icon="query_stats">query_stats</span>
+<span class="font-label-sm text-[10px]">Stats</span>
+</a>
+</nav>
+<!-- Adjust main content margin on desktop to account for side nav -->
+<style>
+        @media (min-width: 768px) {
+            main {
+                margin-left: 80px;
+                padding-bottom: 24px; /* Reset mobile bottom nav padding */
+            }
+        }
+    </style>
+
+
+</body></html>

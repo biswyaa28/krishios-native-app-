@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
+import 'core/providers/theme_provider.dart';
 import 'firebase_options.dart';
 import 'shared/services/hive_service.dart';
 import 'shared/providers/auth_provider.dart';
@@ -17,20 +18,28 @@ void main() async {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
+    FlutterError.reportError(FlutterErrorDetails(
+      exception: e,
+      stack: StackTrace.current,
+      context: ErrorDescription('Firebase initialization'),
+    ));
   }
   await HiveService.init();
   runApp(const ProviderScope(child: KrishiOSApp()));
 }
 
-class KrishiOSApp extends StatelessWidget {
+class KrishiOSApp extends ConsumerWidget {
   const KrishiOSApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
       title: 'KrishiOS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       home: const MainShell(),
     );
   }

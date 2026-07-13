@@ -115,13 +115,41 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 }
 
   Future<void> _submit() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email address.')),
+      );
+      return;
+    }
+    if (!email.contains('@') || !email.contains('.')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address.')),
+      );
+      return;
+    }
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your password.')),
+      );
+      return;
+    }
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must be at least 6 characters.')),
+      );
+      return;
+    }
+
     setState(() => _loading = true);
     try {
       final auth = ref.read(authServiceProvider);
       if (_isLogin) {
-        await auth.signInWithEmail(_emailController.text, _passwordController.text);
+        await auth.signInWithEmail(email, password);
       } else {
-        await auth.signUpWithEmail(_emailController.text, _passwordController.text, _nameController.text);
+        await auth.signUpWithEmail(email, password, _nameController.text);
       }
     } catch (e) {
       if (mounted) {
@@ -186,6 +214,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           ),
         ],
       ),
-    );
+    ).then((_) => emailResetController.dispose());
   }
 }

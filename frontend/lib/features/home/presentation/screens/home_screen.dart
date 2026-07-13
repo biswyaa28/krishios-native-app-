@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../weather/presentation/widgets/weather_alerts.dart';
 import '../../../weather/presentation/widgets/weather_card.dart';
@@ -8,11 +7,11 @@ import '../../../profile/presentation/screens/profile_screen.dart';
 import '../widgets/recent_scans_section.dart';
 import '../widgets/recommended_actions_section.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     return ListView(
       padding: EdgeInsets.fromLTRB(16, 0, 16, 80 + bottomInset),

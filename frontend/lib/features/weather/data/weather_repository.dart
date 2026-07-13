@@ -17,8 +17,8 @@ class WeatherRepository {
   }
 
   Future<Weather?> fetchCurrentConditions({
-    double latitude = 25.6,
-    double longitude = 85.1,
+    double latitude = ApiConstants.fallbackLatitude,
+    double longitude = ApiConstants.fallbackLongitude,
   }) async {
     try {
       final uri = Uri.parse(ApiConstants.openMeteoBaseUrl).replace(queryParameters: {
@@ -54,8 +54,8 @@ class WeatherRepository {
   }
 
   Future<List<DailyForecast>> fetchForecast({
-    double latitude = 25.6,
-    double longitude = 85.1,
+    double latitude = ApiConstants.fallbackLatitude,
+    double longitude = ApiConstants.fallbackLongitude,
   }) async {
     try {
       final uri = Uri.parse(ApiConstants.openMeteoBaseUrl).replace(queryParameters: {

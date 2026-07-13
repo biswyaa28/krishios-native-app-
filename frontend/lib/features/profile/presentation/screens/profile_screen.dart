@@ -269,13 +269,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        SizedBox(
+          SizedBox(
           width: double.infinity,
           height: 48,
           child: OutlinedButton.icon(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ref.read(authServiceProvider).signOut();
+              await ref.read(authServiceProvider).signOut();
             },
             icon: const Icon(Icons.logout),
             label: const Text('Log Out'),

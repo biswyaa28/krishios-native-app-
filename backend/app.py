@@ -16,13 +16,13 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Load TorchScript model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "ai", "models", "model.ts")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "ai", "models", "model.pt")
 model = None
 
 if os.path.exists(MODEL_PATH):
@@ -49,7 +49,7 @@ preprocess = transforms.Compose([
 CLASS_NAMES = [
     "Apple Scab", "Apple Black Rot", "Apple Cedar Rust", "Apple Healthy",
     "Blueberry Healthy", "Cherry Powdery Mildew", "Cherry Healthy",
-    "Corn Common Rust", "Corn Gray Leaf Spot", "Corn Northern Leaf Blight", "Corn Healthy",
+    "Corn Gray Leaf Spot", "Corn Common Rust", "Corn Northern Leaf Blight", "Corn Healthy",
     "Grape Black Rot", "Grape Black Measles", "Grape Leaf Blight", "Grape Healthy",
     "Orange Huanglongbing (Citrus Greening)", "Peach Bacterial Spot", "Peach Healthy",
     "Pepper Bell Bacterial Spot", "Pepper Bell Healthy", "Potato Early Blight", "Potato Late Blight", "Potato Healthy",
@@ -71,8 +71,10 @@ def health_check():
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     """Diagnose crop disease from uploaded image file."""
-    if not file.content_type.startswith("image/"):
+    if file.content_type and not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Uploaded file must be an image.")
+    elif not file.content_type:
+        print("[WARN] No content type provided; proceeding with image/octet-stream")
 
     try:
         # Read image
@@ -98,10 +100,15 @@ async def predict(file: UploadFile = File(...)):
 
         class_name = CLASS_NAMES[class_idx.item()] if class_idx.item() < len(CLASS_NAMES) else "Unknown Disease"
 
+        # Aggregate probability across all "healthy" classes for a meaningful health score
+        healthy_indices = {3, 4, 6, 10, 14, 17, 19, 22, 23, 24, 27, 37}
+        healthy_prob = sum(probabilities[i].item() for i in healthy_indices)
+
         return {
             "prediction": class_name,
             "confidence": float(confidence.item()),
-            "class_index": int(class_idx.item())
+            "class_index": int(class_idx.item()),
+            "health_score": round(healthy_prob * 100, 1),
         }
 
     except Exception as e:

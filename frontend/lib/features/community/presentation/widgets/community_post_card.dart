@@ -136,14 +136,19 @@ class PostCard extends ConsumerWidget {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     final notifier = ref.read(likedPostsProvider.notifier);
+                    final previousState = notifier.state;
                     if (isLiked) {
                       notifier.state = notifier.state.difference({post.id});
                     } else {
                       notifier.state = notifier.state.union({post.id});
                     }
-                    ref.read(communityRepositoryProvider).toggleLike(post.id, isLiked);
+                    try {
+                      await ref.read(communityRepositoryProvider).toggleLike(post.id, isLiked);
+                    } catch (_) {
+                      notifier.state = previousState;
+                    }
                   },
                   child: Row(
                     children: [

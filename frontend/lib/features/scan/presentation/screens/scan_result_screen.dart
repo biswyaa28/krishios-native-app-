@@ -14,28 +14,9 @@ class ScanResultScreen extends StatelessWidget {
     final text = 'KrishiOS Diagnostic Report:\n'
         'Crop: ${scan.cropName}\n'
         'Pathology: ${scan.diagnosis}\n'
-        'Health Score: ${scan.healthScore.toStringAsFixed(1)}%\n'
+        'Health Score: ${(scan.healthScore.isNaN || scan.healthScore.isInfinite ? 0.0 : scan.healthScore).toStringAsFixed(1)}%\n'
         'Recommended Action: ${scan.treatment ?? "Monitor soil conditions."}';
     Share.share(text, subject: 'KrishiOS Leaf Diagnosis');
-  }
-
-  void _downloadReport(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Generating PDF Report...'),
-        duration: Duration(milliseconds: 800),
-      ),
-    );
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('PDF Report downloaded successfully to Documents/KrishiOS_${scan.id.substring(0, 5)}.pdf'),
-            backgroundColor: AppColors.primary,
-          ),
-        );
-      }
-    });
   }
 
   @override
@@ -58,11 +39,6 @@ class ScanResultScreen extends StatelessWidget {
             icon: const Icon(Icons.share),
             onPressed: () => _shareReport(context),
             tooltip: 'Share Report',
-          ),
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: () => _downloadReport(context),
-            tooltip: 'Download PDF',
           ),
         ],
       ),
@@ -133,13 +109,35 @@ class ScanResultScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
+          // Low confidence warning
+          if (scan.confidence != null && scan.confidence! < 0.5)
+            Card(
+              color: Colors.orange.withValues(alpha: 0.15),
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Low confidence result. The AI model is uncertain — manual inspection recommended.',
+                        style: TextStyle(color: Colors.orange, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+
           // Diagnostic Analytics Grid
           Row(
             children: [
               Expanded(
                 child: _buildMetricCard(
                   title: 'Health Score',
-                  value: '${scan.healthScore.toStringAsFixed(1)}%',
+                  value: '${(scan.healthScore.isNaN || scan.healthScore.isInfinite ? 0.0 : scan.healthScore).toStringAsFixed(1)}%',
                   icon: Icons.favorite,
                   iconColor: Colors.redAccent,
                 ),
@@ -188,25 +186,7 @@ class ScanResultScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Nearby agricultural insight
-          Card(
-            color: AppColors.secondaryContainer.withValues(alpha: 0.3),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: AppColors.onSecondaryContainer),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '3 other farms in your region reported similar crop pathology characteristics this week.',
-                      style: AppTextStyles.bodySm.copyWith(color: AppColors.onSecondaryContainer),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Regional insight placeholder — will be populated with real data in future
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -324,6 +325,6 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       category: category,
       createdAt: DateTime.now(),
     );
-    ref.read(communityRepositoryProvider).createPost(newPost);
+    unawaited(ref.read(communityRepositoryProvider).createPost(newPost));
   }
 }

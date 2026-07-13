@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/providers/auth_provider.dart';
 import '../../../../shared/services/hive_service.dart';
 
@@ -15,7 +16,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final Box _prefsBox = HiveService.getUserPrefsBox();
 
-  bool get _darkMode => _prefsBox.get('dark_mode', defaultValue: false);
+  bool get _darkMode => ref.watch(themeModeProvider) == ThemeMode.dark;
   bool get _pushNotifications => _prefsBox.get('notifications', defaultValue: true);
   bool get _offlineSync => _prefsBox.get('offline_sync', defaultValue: true);
   String get _language => _prefsBox.get('language', defaultValue: 'English');
@@ -74,15 +75,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: const Text('Dark Mode'),
                   subtitle: const Text('Enable dark user interface themes.'),
                   value: _darkMode,
-                  activeColor: AppColors.primary,
-                  onChanged: (val) => _togglePreference('dark_mode', val),
+                  activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+                  activeThumbColor: AppColors.primary,
+                  onChanged: (val) {
+                    _togglePreference('dark_mode', val);
+                    ref.read(themeModeProvider.notifier).setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
+                  },
                 ),
                 const Divider(height: 1),
                 SwitchListTile(
                   title: const Text('Push Notifications'),
                   subtitle: const Text('Alert me of community post comments & news.'),
                   value: _pushNotifications,
-                  activeColor: AppColors.primary,
+                  activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+                  activeThumbColor: AppColors.primary,
                   onChanged: (val) => _togglePreference('notifications', val),
                 ),
                 const Divider(height: 1),
@@ -90,7 +96,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: const Text('Offline Database Caching'),
                   subtitle: const Text('Allow scanning crops offline.'),
                   value: _offlineSync,
-                  activeColor: AppColors.primary,
+                  activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+                  activeThumbColor: AppColors.primary,
                   onChanged: (val) => _togglePreference('offline_sync', val),
                 ),
                 const Divider(height: 1),

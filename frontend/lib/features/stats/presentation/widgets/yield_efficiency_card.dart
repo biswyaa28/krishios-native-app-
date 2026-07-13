@@ -9,7 +9,7 @@ class YieldEfficiencyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final percentage = (healthScore * 100).round();
+    final percentage = healthScore.round();
     final label = percentage >= 80 ? 'Optimal' : percentage >= 60 ? 'Good' : percentage > 0 ? 'Fair' : 'N/A';
 
     return Container(

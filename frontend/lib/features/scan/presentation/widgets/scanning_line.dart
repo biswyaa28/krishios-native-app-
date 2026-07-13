@@ -31,31 +31,36 @@ class _ScanningLineState extends State<ScanningLine>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Positioned(
-          top: _animation.value * 256,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: 2,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  AppColors.tertiaryFixedDim,
-                  Colors.transparent,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.tertiaryFixedDim.withValues(alpha: 0.5),
-                  blurRadius: 8,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxHeight = constraints.maxHeight;
+        return AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            return Positioned(
+              top: _animation.value * maxHeight,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 2,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      AppColors.tertiaryFixedDim,
+                      Colors.transparent,
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.tertiaryFixedDim.withValues(alpha: 0.5),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

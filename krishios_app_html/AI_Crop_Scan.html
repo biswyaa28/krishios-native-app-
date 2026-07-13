@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KrishiOS - AI Crop Scan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#154212",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#ecefea",
+                        "secondary-fixed-dim": "#ebbcac",
+                        "secondary": "#7a5649",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d8dbd6",
+                        "surface-container-low": "#f2f4ef",
+                        "surface-container-highest": "#e1e3de",
+                        "background": "#f8faf5",
+                        "secondary-container": "#fdcdbc",
+                        "surface-container-high": "#e7e9e4",
+                        "surface-variant": "#e1e3de",
+                        "outline-variant": "#c2c9bb",
+                        "on-tertiary-container": "#ffb51e",
+                        "surface-tint": "#3b6934",
+                        "tertiary-container": "#6c4a00",
+                        "primary-fixed-dim": "#a1d494",
+                        "inverse-on-surface": "#eff1ec",
+                        "inverse-surface": "#2e312e",
+                        "on-error": "#ffffff",
+                        "surface": "#f8faf5",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "tertiary-fixed-dim": "#ffba38",
+                        "tertiary": "#4f3500",
+                        "primary-fixed": "#bcf0ae",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#a1d494",
+                        "on-tertiary-fixed": "#281900",
+                        "secondary-fixed": "#ffdbcf",
+                        "on-secondary-fixed-variant": "#603f33",
+                        "on-surface": "#191c1a",
+                        "on-background": "#191c1a",
+                        "on-primary-fixed-variant": "#23501e",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#2e150b",
+                        "on-primary-fixed": "#002201",
+                        "error": "#ba1a1a",
+                        "primary-container": "#2d5a27",
+                        "outline": "#72796e",
+                        "surface-bright": "#f8faf5",
+                        "tertiary-fixed": "#ffdeac",
+                        "on-surface-variant": "#42493e",
+                        "on-secondary-container": "#795548",
+                        "on-primary-container": "#9dd090"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "touch-target-min": "48px",
+                        "gutter": "16px",
+                        "margin-tablet": "24px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .viewfinder-corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-color: #ffba38; /* tertiary-fixed-dim */
+            border-style: solid;
+            animation: pulse-corner 2s infinite;
+        }
+        .corner-tl { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 12px; }
+        .corner-tr { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 12px; }
+        .corner-bl { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-bottom-left-radius: 12px; }
+        .corner-br { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-bottom-right-radius: 12px; }
+
+        @keyframes pulse-corner {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .scanning-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ffba38, transparent);
+            top: 0;
+            animation: scan 3s linear infinite;
+            box-shadow: 0 0 8px #ffba38;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        body {
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8faf5;
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md px-margin-mobile h-16 flex items-center justify-between border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="text-headline-md text-on-surface">KrishiOS</h1>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined text-on-surface">help</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex flex-col p-margin-mobile gap-6">
+<!-- Instruction Section -->
+<div class="space-y-2">
+<h2 class="text-headline-lg-mobile text-on-surface">Identify Crop Disease</h2>
+<p class="text-body-md text-on-surface-variant">Point your camera at the affected leaves or stems for a real-time AI diagnosis.</p>
+</div>
+<!-- Camera Viewfinder Area -->
+<div class="relative flex-1 min-h-[320px] rounded-2xl overflow-hidden bg-black shadow-lg">
+<!-- Simulated Camera Feed -->
+<img alt="Camera Preview" class="absolute inset-0 w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBL1pQSs_sdx44bPpSr0Aqwer8eRZj3GEUcjm2BCH6Iz4vd8ryNeESmfpNRLBZSnAsyyWYTNOr0mX6fmPdX4DVC-aR1-dfa19rnY-hlG0vCiW2Z9w84Q-G9F_NQWXhC4hNYG6WcYNyH2OG0nJQsupQ6rI7wx79Jt98cUDyxDkVDYRLPh3aD7aTiGdTusnYeEZM7unF-kl9EsiJY3_NB97DL0tA7ZfycmK_Xq8-H2UVa1-IDlVa6JJ160g"/>
+<!-- Overlay Viewfinder UI -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="relative w-64 h-64">
+<div class="viewfinder-corner corner-tl"></div>
+<div class="viewfinder-corner corner-tr"></div>
+<div class="viewfinder-corner corner-bl"></div>
+<div class="viewfinder-corner corner-br"></div>
+<div class="scanning-line"></div>
+</div>
+</div>
+<!-- Lighting/Zoom Controls -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-2 bg-black/40 backdrop-blur-sm rounded-full">
+<button class="text-white">
+<span class="material-symbols-outlined text-[24px]">flash_off</span>
+</button>
+<div class="h-4 w-[1px] bg-white/20"></div>
+<span class="text-white text-label-md">1x</span>
+<div class="h-4 w-[1px] bg-white/20"></div>
+<button class="text-white">
+<span class="material-symbols-outlined text-[24px]">zoom_in</span>
+</button>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-3 pb-4">
+<button class="flex items-center justify-center gap-2 bg-primary text-on-primary h-touch-target-min rounded-full font-label-md shadow-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined">photo_camera</span>
+                Capture Photo
+            </button>
+<button class="flex items-center justify-center gap-2 bg-secondary-container text-on-secondary-container h-touch-target-min rounded-full font-label-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined">image</span>
+                Upload from Gallery
+            </button>
+</div>
+</main>
+<!-- Navigation Bar (Optional but good for app context) -->
+<nav class="bg-surface-container px-4 py-2 flex justify-around border-t border-outline-variant">
+<button class="flex flex-col items-center gap-1 p-2 text-on-surface-variant">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-primary">
+<span class="material-symbols-outlined fill-1">document_scanner</span>
+<span class="text-label-sm font-semibold">Scan</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-on-surface-variant">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-sm">History</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-on-surface-variant">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-label-sm">Profile</span>
+</button>
+</nav>
+</body></html>
