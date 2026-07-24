@@ -44,10 +44,28 @@ Boots simulator, starts backend, launches app:
 xcrun simctl boot "iPhone 17 Pro" 2>/dev/null; open -a Simulator && (cd backend && source .venv/bin/activate && python app.py) & (cd frontend && flutter run -d 'iPhone 17 Pro')
 ```
 
-### PPT Website
+### Website (Landing Page + Interactive Experience)
+
+Both run from the same Next.js app on `http://localhost:3000`:
 
 ```bash
 cd website && npm install && npm run dev
+```
+
+Then open in your browser:
+
+| Page | URL | What it is |
+|------|-----|-----------|
+| **Landing Page** | `http://localhost:3000` | Marketing site (Hero, Features, Download, Team, Footer) |
+| **Interactive Experience** | `http://localhost:3000/experience` | 14-scene cinematic presentation (Fullscreen, Arrow keys to navigate, `P` for presenter HUD) |
+| **Flutter Web App** | `http://localhost:3000/app` | Compiled KrishiOS app served as static files |
+
+> The `/api/*` requests are proxied to the Python backend (`http://127.0.0.1:8000`) via `next.config.ts` rewrites, so start the backend first for live AI inference.
+
+### Production build (optional)
+
+```bash
+cd website && npm run build && npm run start
 ```
 
 ---

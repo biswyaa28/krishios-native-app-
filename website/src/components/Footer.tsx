@@ -98,6 +98,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/experience" className="hover:text-[#233B22] transition-colors">
+                  Interactive Demo
+                </Link>
+              </li>
+              <li>
                 <Link href="/#download" className="hover:text-[#233B22] transition-colors">
                   Download APK
                 </Link>

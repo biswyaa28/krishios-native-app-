@@ -49,7 +49,7 @@ export default function Navbar() {
           <Link href="/#features" className="hover:text-[#233B22] transition-colors">
             Architecture
           </Link>
-          <Link href="/#experience" className="hover:text-[#233B22] transition-colors">
+          <Link href="/experience" className="hover:text-[#233B22] transition-colors">
             Experience
           </Link>
           <Link href="/#download" className="hover:text-[#233B22] transition-colors">
@@ -110,7 +110,7 @@ export default function Navbar() {
             Architecture
           </Link>
           <Link
-            href="/#experience"
+            href="/experience"
             onClick={() => setMobileMenuOpen(false)}
             className="py-2 border-b border-[#1A2919]/10"
           >
