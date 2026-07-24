@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:krishios/core/theme/app_theme.dart';
 import 'package:krishios/shared/presentation/providers/language_provider.dart';
+import 'package:krishios/shared/presentation/providers/navigation_provider.dart';
 import 'package:krishios/shared/services/translation_service.dart';
 import 'package:krishios/features/profile/presentation/screens/profile_screen.dart';
 
@@ -10,18 +11,23 @@ class KrishiMobileHeader extends ConsumerWidget {
   final String title;
   final String subtitle;
   final Widget? trailing;
+  final bool? showBackButton;
 
   const KrishiMobileHeader({
     super.key,
     this.title = 'KrishiOS',
     required this.subtitle,
     this.trailing,
+    this.showBackButton,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeLang = ref.watch(languageProvider);
     final topInset = MediaQuery.of(context).padding.top;
+    final canPop = Navigator.canPop(context);
+    final currentIndex = ref.watch(mainTabIndexProvider);
+    final shouldShowBack = showBackButton ?? (canPop || currentIndex != 0);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -32,16 +38,31 @@ class KrishiMobileHeader extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // 1. Hamburger Drawer Menu Icon
-          IconButton(
-            icon: Icon(Icons.menu_rounded, color: AppColors.primary, size: 26),
-            tooltip: 'Open Menu',
-            padding: const EdgeInsets.all(4),
-            constraints: const BoxConstraints(),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+          // 1. Back Button or Hamburger Drawer Menu Icon
+          if (shouldShowBack)
+            IconButton(
+              icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 22),
+              tooltip: 'Back',
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  ref.read(mainTabIndexProvider.notifier).state = 0;
+                }
+              },
+            )
+          else
+            IconButton(
+              icon: Icon(Icons.menu_rounded, color: AppColors.primary, size: 26),
+              tooltip: 'Open Menu',
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
           const SizedBox(width: 8),
 
           // 2. Official Brand Logo

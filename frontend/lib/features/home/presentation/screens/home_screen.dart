@@ -160,7 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const CropScanScreen()),
+                    MaterialPageRoute(builder: (_) => const CropScanScreen(showBackButton: true)),
                   );
                 },
                 borderRadius: BorderRadius.circular(16),

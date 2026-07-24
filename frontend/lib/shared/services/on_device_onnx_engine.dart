@@ -2,13 +2,57 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/foundation.dart' show debugPrint, compute;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:onnxruntime_v2/onnxruntime_v2.dart';
 import 'package:image/image.dart' as img_lib;
 import '../models/ai_engine_result.dart';
 import 'ai_engine.dart';
+
+class _PreprocessedBuffers {
+  final Float32List detFloatBuffer;
+  final Float32List classFloatBuffer;
+  _PreprocessedBuffers(this.detFloatBuffer, this.classFloatBuffer);
+}
+
+_PreprocessedBuffers? _preprocessImageBuffers(Uint8List bytes) {
+  final img = img_lib.decodeImage(bytes);
+  if (img == null) return null;
+
+  // 1. Leaf Detector Buffer (416x416)
+  final imgDetResized = img_lib.copyResize(img, width: 416, height: 416);
+  final detFloatBuffer = Float32List(1 * 3 * 416 * 416);
+  for (int y = 0; y < 416; y++) {
+    for (int x = 0; x < 416; x++) {
+      final pixel = imgDetResized.getPixel(x, y);
+      detFloatBuffer[0 * 416 * 416 + y * 416 + x] = pixel.r / 255.0;
+      detFloatBuffer[1 * 416 * 416 + y * 416 + x] = pixel.g / 255.0;
+      detFloatBuffer[2 * 416 * 416 + y * 416 + x] = pixel.b / 255.0;
+    }
+  }
+
+  // 2. Classification Buffer (224x224)
+  final imgResized = img_lib.copyResize(img, width: 224, height: 224);
+  final classFloatBuffer = Float32List(1 * 3 * 224 * 224);
+  const mean = [0.485, 0.456, 0.406];
+  const std = [0.229, 0.224, 0.225];
+
+  for (int y = 0; y < 224; y++) {
+    for (int x = 0; x < 224; x++) {
+      final pixel = imgResized.getPixel(x, y);
+      double r = (pixel.r / 255.0 - mean[0]) / std[0];
+      double g = (pixel.g / 255.0 - mean[1]) / std[1];
+      double b = (pixel.b / 255.0 - mean[2]) / std[2];
+
+      classFloatBuffer[0 * 224 * 224 + y * 224 + x] = r;
+      classFloatBuffer[1 * 224 * 224 + y * 224 + x] = g;
+      classFloatBuffer[2 * 224 * 224 + y * 224 + x] = b;
+    }
+  }
+
+  return _PreprocessedBuffers(detFloatBuffer, classFloatBuffer);
+}
 
 class OnDeviceOnnxEngine implements AIEngine {
   OrtSession? _classifierSession;
@@ -66,26 +110,15 @@ class OnDeviceOnnxEngine implements AIEngine {
         return AIEngineResult.failure('Unsupported image file type: ${imageFile.runtimeType}');
       }
 
-      // 1. Load image and preprocess
-      final img = img_lib.decodeImage(bytes);
-      if (img == null) {
+      // 1. Offload image decoding & preprocessing to background Isolate
+      final preprocessed = await compute(_preprocessImageBuffers, bytes);
+      if (preprocessed == null) {
         return AIEngineResult.failure('Failed to decode input leaf image.');
       }
 
       // --- Leaf Detection Stage ---
-      final imgDetResized = img_lib.copyResize(img, width: 416, height: 416);
-      final detFloatBuffer = Float32List(1 * 3 * 416 * 416);
-      for (int y = 0; y < 416; y++) {
-        for (int x = 0; x < 416; x++) {
-          final pixel = imgDetResized.getPixel(x, y);
-          detFloatBuffer[0 * 416 * 416 + y * 416 + x] = pixel.r / 255.0;
-          detFloatBuffer[1 * 416 * 416 + y * 416 + x] = pixel.g / 255.0;
-          detFloatBuffer[2 * 416 * 416 + y * 416 + x] = pixel.b / 255.0;
-        }
-      }
-
       final detInputTensor = OrtValueTensor.createTensorWithDataList(
-        detFloatBuffer,
+        preprocessed.detFloatBuffer,
         [1, 3, 416, 416],
       );
 
@@ -166,37 +199,9 @@ class OnDeviceOnnxEngine implements AIEngine {
       }
 
       // --- Disease Classification Stage ---
-      // Resize to 224x224 (efficientnet classifier input shape)
-      final imgResized = img_lib.copyResize(img, width: 224, height: 224);
-
-      final floatBuffer = Float32List(1 * 3 * 224 * 224);
-      final mean = [0.485, 0.456, 0.406];
-      final std = [0.229, 0.224, 0.225];
-
-      for (int y = 0; y < 224; y++) {
-        for (int x = 0; x < 224; x++) {
-          final pixel = imgResized.getPixel(x, y);
-
-          // Extract color channels and scale to [0.0, 1.0]
-          double r = pixel.r / 255.0;
-          double g = pixel.g / 255.0;
-          double b = pixel.b / 255.0;
-
-          // Apply ImageNet standardization
-          r = (r - mean[0]) / std[0];
-          g = (g - mean[1]) / std[1];
-          b = (b - mean[2]) / std[2];
-
-          // Write in CHW transposition layout
-          floatBuffer[0 * 224 * 224 + y * 224 + x] = r;
-          floatBuffer[1 * 224 * 224 + y * 224 + x] = g;
-          floatBuffer[2 * 224 * 224 + y * 224 + x] = b;
-        }
-      }
-
-      // Create OrtValueTensor mapping the input shape
+      // Create OrtValueTensor mapping the input shape from preprocessed buffer
       final inputTensor = OrtValueTensor.createTensorWithDataList(
-        floatBuffer,
+        preprocessed.classFloatBuffer,
         [1, 3, 224, 224],
       );
 

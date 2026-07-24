@@ -1,6 +1,7 @@
-import 'dart:io' show File;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image/image.dart' as img_lib;
 import 'scan_result_screen.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/scan_result.dart';
@@ -19,35 +21,68 @@ import 'package:krishios/shared/presentation/widgets/krishi_mobile_header.dart';
 import 'package:krishios/shared/services/translation_service.dart';
 import 'package:krishios/shared/presentation/providers/language_provider.dart';
 
+Uint8List _compressImageTask(Uint8List rawBytes) {
+  final image = img_lib.decodeImage(rawBytes);
+  if (image == null) return rawBytes;
+  img_lib.Image resized = image;
+  if (image.width > 1080 || image.height > 1080) {
+    if (image.width > image.height) {
+      resized = img_lib.copyResize(image, width: 1080);
+    } else {
+      resized = img_lib.copyResize(image, height: 1080);
+    }
+  }
+  return Uint8List.fromList(img_lib.encodeJpg(resized, quality: 85));
+}
+
 class CropScanScreen extends ConsumerStatefulWidget {
-  const CropScanScreen({super.key});
+  final bool? showBackButton;
+  const CropScanScreen({super.key, this.showBackButton});
 
   @override
   ConsumerState<CropScanScreen> createState() => _CropScanScreenState();
 }
 
-class _CropScanScreenState extends ConsumerState<CropScanScreen> {
+class _CropScanScreenState extends ConsumerState<CropScanScreen> with WidgetsBindingObserver {
   CameraController? _controller;
   List<CameraDescription> _cameras = [];
   bool _isCameraInitialized = false;
   bool _isProcessing = false;
   String _statusMessage = '';
   String? _cameraError;
+  bool _isFlashOn = false;
+  Offset? _focusPoint;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initCameraWithPermission();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      _isCameraInitialized = false;
+      controller.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _initCamera();
+    }
+  }
+
   Future<void> _initCameraWithPermission() async {
-    if (!await _requestCameraPermission()) return;
+    final hasPermission = await _requestCameraPermission();
+    if (!hasPermission) return;
     await _initCamera();
   }
 
@@ -56,15 +91,24 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
       _cameraError = null;
       _cameras = await availableCameras();
       if (_cameras.isNotEmpty) {
-        _controller = CameraController(
+        final controller = CameraController(
           _cameras.first,
           ResolutionPreset.medium,
           enableAudio: false,
         );
-        await _controller!.initialize();
+        await controller.initialize();
         if (mounted) {
           setState(() {
+            _controller = controller;
             _isCameraInitialized = true;
+          });
+        } else {
+          await controller.dispose();
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _cameraError = 'No cameras available on this device.';
           });
         }
       }
@@ -81,7 +125,7 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
   Future<void> _processImage(XFile xfile) async {
     setState(() {
       _isProcessing = true;
-      _statusMessage = 'Uploading crop image...';
+      _statusMessage = 'Optimizing & uploading image...';
     });
 
     try {
@@ -90,7 +134,7 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
       final userId = user?.uid ?? 'guest-user';
       final scanId = FirebaseFirestore.instance.collection('scans').doc().id;
 
-      // 1. Upload to Firebase Storage
+      // 1. Compress image in background Isolate & Upload to Firebase Storage
       try {
         final storageRef = FirebaseStorage.instance
             .ref()
@@ -98,11 +142,13 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
             .child(userId)
             .child('$scanId.jpg');
 
-        if (kIsWeb) {
-          await storageRef.putData(await xfile.readAsBytes());
-        } else {
-          await storageRef.putFile(File(xfile.path));
-        }
+        final rawBytes = await xfile.readAsBytes();
+        final compressedBytes = await compute(_compressImageTask, rawBytes);
+
+        await storageRef.putData(
+          compressedBytes,
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
         downloadUrl = await storageRef.getDownloadURL();
       } catch (e) {
         debugPrint('[WARNING] Firebase Storage upload failed: $e. Using local path.');
@@ -205,18 +251,78 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
     }
   }
 
-  Future<bool> _requestCameraPermission() async {
-    final status = await Permission.camera.request();
-    if (status.isGranted) return true;
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Camera permission is required to capture photos.')),
-      );
+  Future<void> _toggleFlash() async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    try {
+      final nextMode = _isFlashOn ? FlashMode.off : FlashMode.torch;
+      await _controller!.setFlashMode(nextMode);
+      setState(() {
+        _isFlashOn = !_isFlashOn;
+      });
+      HapticFeedback.selectionClick();
+    } catch (e) {
+      debugPrint('[WARNING] Flash toggle error: $e');
     }
-    return false;
+  }
+
+  Future<void> _onTapPreview(TapDownDetails details, BoxConstraints constraints) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    final offset = Offset(
+      details.localPosition.dx / constraints.maxWidth,
+      details.localPosition.dy / constraints.maxHeight,
+    );
+    try {
+      await _controller!.setFocusPoint(offset);
+      await _controller!.setExposurePoint(offset);
+      setState(() {
+        _focusPoint = details.localPosition;
+      });
+      HapticFeedback.selectionClick();
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _focusPoint = null);
+      });
+    } catch (e) {
+      debugPrint('[WARNING] Tap focus error: $e');
+    }
+  }
+
+  Future<bool> _requestCameraPermission() async {
+    var status = await Permission.camera.status;
+    if (status.isPermanentlyDenied) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Camera Permission Needed'),
+            content: const Text(
+              'Camera access is required for real-time leaf diagnosis. Please enable it in App Settings.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  openAppSettings();
+                },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+      }
+      return false;
+    }
+    if (!status.isGranted) {
+      status = await Permission.camera.request();
+    }
+    return status.isGranted;
   }
 
   Future<void> _capturePhoto() async {
+    HapticFeedback.mediumImpact();
     if (!await _requestCameraPermission()) return;
     if (_controller == null || !_controller!.value.isInitialized) {
       await _initCamera();
@@ -242,6 +348,7 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
   }
 
   Future<void> _pickFromGallery() async {
+    HapticFeedback.mediumImpact();
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? file = await picker.pickImage(source: ImageSource.gallery);
@@ -269,6 +376,7 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
             children: [
               KrishiMobileHeader(
                 subtitle: TranslationService.translate('scan_title', activeLang),
+                showBackButton: widget.showBackButton,
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -297,7 +405,49 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
                       children: [
                         Positioned.fill(
                           child: _isCameraInitialized && _controller != null
-                              ? CameraPreview(_controller!)
+                              ? LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTapDown: (details) => _onTapPreview(details, constraints),
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          CameraPreview(_controller!),
+                                          if (_focusPoint != null)
+                                            Positioned(
+                                              left: _focusPoint!.dx - 24,
+                                              top: _focusPoint!.dy - 24,
+                                              child: Container(
+                                                width: 48,
+                                                height: 48,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(color: Colors.amber, width: 2),
+                                                ),
+                                              ),
+                                            ),
+                                          Positioned(
+                                            top: 12,
+                                            right: 12,
+                                            child: Material(
+                                              color: Colors.black54,
+                                              shape: const CircleBorder(),
+                                              child: IconButton(
+                                                icon: Icon(
+                                                  _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                                                  color: _isFlashOn ? Colors.amber : Colors.white70,
+                                                ),
+                                                onPressed: _toggleFlash,
+                                                tooltip: 'Toggle Flash',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                )
                               : Container(
                                   color: const Color(0xFF1A2A1A),
                                   child: Center(

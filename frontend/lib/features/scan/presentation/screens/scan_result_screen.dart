@@ -9,24 +9,60 @@ import '../../../weather/presentation/providers/weather_provider.dart';
 import '../../../agronomy/widgets/agronomy_report_widget.dart';
 import 'package:krishios/shared/services/translation_service.dart';
 import 'package:krishios/shared/presentation/providers/language_provider.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'chat_screen.dart';
 
-class ScanResultScreen extends ConsumerWidget {
+class ScanResultScreen extends ConsumerStatefulWidget {
   final ScanResult scan;
 
   const ScanResultScreen({super.key, required this.scan});
 
+  @override
+  ConsumerState<ScanResultScreen> createState() => _ScanResultScreenState();
+}
+
+class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
+  final FlutterTts _tts = FlutterTts();
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tts.setCompletionHandler(() {
+      if (mounted) setState(() => _isPlaying = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _tts.stop();
+    super.dispose();
+  }
+
+  Future<void> _toggleAudioReadout(String textToSpeak, String langCode) async {
+    if (_isPlaying) {
+      await _tts.stop();
+      if (mounted) setState(() => _isPlaying = false);
+    } else {
+      await _tts.setLanguage(langCode == 'hi' ? 'hi-IN' : 'en-US');
+      await _tts.setSpeechRate(0.45);
+      if (mounted) setState(() => _isPlaying = true);
+      await _tts.speak(textToSpeak);
+    }
+  }
+
   void _shareReport(BuildContext context) {
     final text = 'KrishiOS Diagnostic Report:\n'
-        'Crop: ${scan.cropName}\n'
-        'Pathology: ${scan.diagnosis}\n'
-        'Health Score: ${(scan.healthScore.isNaN || scan.healthScore.isInfinite ? 0.0 : scan.healthScore).toStringAsFixed(1)}%\n'
-        'Recommended Action: ${scan.treatment ?? "Monitor soil conditions."}';
+        'Crop: ${widget.scan.cropName}\n'
+        'Pathology: ${widget.scan.diagnosis}\n'
+        'Health Score: ${(widget.scan.healthScore.isNaN || widget.scan.healthScore.isInfinite ? 0.0 : widget.scan.healthScore).toStringAsFixed(1)}%\n'
+        'Recommended Action: ${widget.scan.treatment ?? "Monitor soil conditions."}';
     Share.share(text, subject: 'KrishiOS Leaf Diagnosis');
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final scan = widget.scan;
     final weatherAsync = ref.watch(weatherProvider);
     final weather = weatherAsync.valueOrNull;
     final activeLang = ref.watch(languageProvider);
@@ -41,6 +77,7 @@ class ScanResultScreen extends ConsumerWidget {
 
     final localizedCrop = TranslationService.translateCrop(scan.cropName, activeLang);
     final localizedDisease = TranslationService.translateDisease(scan.diagnosis, activeLang);
+    final textToSpeak = 'Crop: $localizedCrop. Diagnosis: $localizedDisease. Recommended treatment: ${scan.treatment ?? "Monitor soil conditions."}';
 
     if (isDesktop) {
       return Scaffold(
@@ -48,6 +85,11 @@ class ScanResultScreen extends ConsumerWidget {
           title: Text(TranslationService.translate('diag_report', activeLang)),
           elevation: 0,
           actions: [
+            IconButton(
+              icon: Icon(_isPlaying ? Icons.volume_off : Icons.volume_up),
+              onPressed: () => _toggleAudioReadout(textToSpeak, activeLang),
+              tooltip: 'Audio Readout',
+            ),
             IconButton(
               icon: const Icon(Icons.share),
               onPressed: () => _shareReport(context),
@@ -210,6 +252,11 @@ class ScanResultScreen extends ConsumerWidget {
         title: Text(TranslationService.translate('diag_report', activeLang)),
         elevation: 0,
         actions: [
+          IconButton(
+            icon: Icon(_isPlaying ? Icons.volume_off : Icons.volume_up),
+            onPressed: () => _toggleAudioReadout(textToSpeak, activeLang),
+            tooltip: 'Audio Readout',
+          ),
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () => _shareReport(context),

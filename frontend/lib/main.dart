@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
@@ -17,11 +16,30 @@ import 'package:krishios/shared/presentation/providers/language_provider.dart';
 import 'package:krishios/shared/services/translation_service.dart';
 import 'shared/presentation/widgets/navigation_drawer.dart';
 import 'shared/presentation/widgets/krishi_ai_fab.dart';
+import 'package:flutter/services.dart';
 import 'shared/presentation/providers/navigation_provider.dart';
 import 'responsive/responsive_shell.dart';
+import 'shared/services/app_permission_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Edge-to-edge system UI styling for Android & iOS
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   } catch (e) {
@@ -55,6 +73,7 @@ class KrishiOSApp extends ConsumerWidget {
 }
 
 final splashDelayProvider = FutureProvider<void>((ref) async {
+  await AppPermissionService.requestInitialPermissions();
   await Future.delayed(const Duration(milliseconds: 1500));
 });
 
@@ -99,10 +118,7 @@ class MainShell extends ConsumerWidget {
     }
 
     final hasSelectedLang = ref.watch(hasSelectedLanguageProvider);
-    final debugBypass = ref.watch(debugLanguageBypassProvider);
-    final shouldShowLang = kDebugMode ? !debugBypass : !hasSelectedLang;
-
-    if (shouldShowLang) {
+    if (!hasSelectedLang) {
       return const LanguageSelectionScreen();
     }
 

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:krishios/core/theme/app_theme.dart';
 import 'package:krishios/shared/presentation/providers/navigation_provider.dart';
@@ -51,6 +52,7 @@ class _KrishiAiFabState extends ConsumerState<KrishiAiFab> with SingleTickerProv
   }
 
   void _toggleExpanded() {
+    HapticFeedback.lightImpact();
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {

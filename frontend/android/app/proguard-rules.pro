@@ -1,34 +1,18 @@
-# Flutter engine
--keep class io.flutter.app.** { *; }
--keep class io.flutter.plugin.**  { *; }
--keep class io.flutter.util.**  { *; }
--keep class io.flutter.view.**  { *; }
--keep class io.flutter.**  { *; }
--keep class io.flutter.plugins.**  { *; }
--keep class io.flutter.embedding.** { *; }
-
-# Firebase
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
-
-# Play Store (deferred components)
--keep class com.google.android.play.core.** { *; }
--dontwarn com.google.android.play.core.**
-
-# Keep models used for JSON / Hive serialization
--keep class com.krishios.krishios.** { *; }
-
-# Keep annotations used by Riverpod / json_serializable
--keepattributes *Annotation*, RuntimeVisibleAnnotations
--keep class **.riverpod.** { *; }
--keep class **.freezed.** { *; }
-
-# General Android
--dontwarn java.lang.instrument.ClassFileTransformer
--dontwarn sun.misc.SignalHandler
-
-# ONNX Runtime & Native C++ Bindings Retention
+# Keep ONNX Runtime C++ FFI JNI bindings
+-keep class com.microsoft.onnxruntime.** { *; }
 -keep class ai.onnxruntime.** { *; }
--keep class com.sun.jna.** { *; }
+-dontwarn com.microsoft.onnxruntime.**
 -dontwarn ai.onnxruntime.**
+
+# Keep Flutter Engine and Plugins JNI interfaces
+-keep class io.flutter.app.** { *; }
+-keep class io.flutter.plugin.** { *; }
+-keep class io.flutter.util.** { *; }
+
+# Keep Firebase dependencies
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
+# Keep Hive models & type adapters
+-keep class io.realm.transformer.** { *; }
 
