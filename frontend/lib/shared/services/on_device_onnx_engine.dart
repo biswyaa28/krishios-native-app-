@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:onnxruntime_v2/onnxruntime_v2.dart';
 import 'package:image/image.dart' as img_lib;
 import '../models/ai_engine_result.dart';
@@ -47,14 +48,25 @@ class OnDeviceOnnxEngine implements AIEngine {
 
   @override
   Future<AIEngineResult> processImage(dynamic imageFile) async {
-    final file = imageFile as File;
     if (!_isReady || _classifierSession == null || _detectorSession == null) {
       return AIEngineResult.failure('ONNX Session not initialized.');
     }
 
     try {
+      final Uint8List bytes;
+      if (imageFile is Uint8List) {
+        bytes = imageFile;
+      } else if (imageFile is XFile) {
+        bytes = await imageFile.readAsBytes();
+      } else if (imageFile is File) {
+        bytes = await imageFile.readAsBytes();
+      } else if (imageFile is String) {
+        bytes = await File(imageFile).readAsBytes();
+      } else {
+        return AIEngineResult.failure('Unsupported image file type: ${imageFile.runtimeType}');
+      }
+
       // 1. Load image and preprocess
-      final bytes = file.readAsBytesSync();
       final img = img_lib.decodeImage(bytes);
       if (img == null) {
         return AIEngineResult.failure('Failed to decode input leaf image.');

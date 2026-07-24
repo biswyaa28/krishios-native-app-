@@ -221,64 +221,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildCompactActionChip(
-                    context,
-                    icon: Icons.chat_bubble_outline_rounded,
-                    label: 'Kavya AI',
-                    color: Colors.purple,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ChatScreen(
-                            scanId: 'general',
-                            cropName: 'General Query',
-                            diagnosis: 'General Assistance',
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildCompactActionChip(
+                      context,
+                      icon: Icons.chat_bubble_outline_rounded,
+                      label: 'Kavya AI',
+                      color: Colors.purple,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ChatScreen(
+                              scanId: 'general',
+                              cropName: 'General Query',
+                              diagnosis: 'General Assistance',
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildCompactActionChip(
-                    context,
-                    icon: Icons.calendar_today_outlined,
-                    label: TranslationService.translate('calendar', activeLang),
-                    color: Colors.orange,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const CalendarScreen()),
-                      );
-                    },
-                  ),
-                  _buildCompactActionChip(
-                    context,
-                    icon: Icons.task_alt_rounded,
-                    label: TranslationService.translate('tasks', activeLang),
-                    color: Colors.blue,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const TaskListScreen()),
-                      );
-                    },
-                  ),
-                  _buildCompactActionChip(
-                    context,
-                    icon: Icons.forum_outlined,
-                    label: TranslationService.translate('community_tab', activeLang),
-                    color: Colors.teal,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const CommunityScreen()),
-                      );
-                    },
-                  ),
-                ],
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _buildCompactActionChip(
+                      context,
+                      icon: Icons.calendar_today_outlined,
+                      label: TranslationService.translate('calendar', activeLang),
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CalendarScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _buildCompactActionChip(
+                      context,
+                      icon: Icons.task_alt_rounded,
+                      label: TranslationService.translate('tasks', activeLang),
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const TaskListScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _buildCompactActionChip(
+                      context,
+                      icon: Icons.forum_outlined,
+                      label: TranslationService.translate('community_tab', activeLang),
+                      color: Colors.teal,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CommunityScreen()),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
 

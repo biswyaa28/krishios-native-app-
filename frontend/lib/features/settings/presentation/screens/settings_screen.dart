@@ -128,8 +128,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _toggleDarkMode(bool value) {
-    ref.read(themeModeProvider.notifier).state = value ? ThemeMode.dark : ThemeMode.light;
-    _prefsBox.put('dark_mode', value);
+    ref.read(themeModeProvider.notifier).setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
   }
 
   void _togglePreference(String key, bool value) {

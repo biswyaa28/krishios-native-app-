@@ -1,19 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/task_storage.dart';
 import '../../domain/models/task_model.dart';
 
 final taskListProvider = StateNotifierProvider<TaskListNotifier, List<Task>>((ref) {
-  return TaskListNotifier();
+  return TaskListNotifier(storage: HiveTaskStorage());
 });
 
 class TaskListNotifier extends StateNotifier<List<Task>> {
-  TaskListNotifier() : super([]) {
+  TaskListNotifier({required TaskStorage storage})
+      : _storage = storage,
+        super([]) {
     _loadInitialTasks();
   }
 
+  final TaskStorage _storage;
+
   void _loadInitialTasks() {
-    // Start empty by default to provide clean state for Guest and fresh accounts
-    state = [];
+    state = _storage.loadTasks();
     checkOverdueTasks();
+  }
+
+  void _persist() {
+    _storage.saveTasks(state);
   }
 
   void checkOverdueTasks() {
@@ -25,11 +33,13 @@ class TaskListNotifier extends StateNotifier<List<Task>> {
       }
       return task;
     }).toList();
+    _persist();
   }
 
   void addTask(Task task) {
     state = [...state, task];
     checkOverdueTasks();
+    _persist();
   }
 
   void toggleTaskComplete(String id) {
@@ -50,6 +60,7 @@ class TaskListNotifier extends StateNotifier<List<Task>> {
       return task;
     }).toList();
     checkOverdueTasks();
+    _persist();
   }
 
   void updateTaskStatus(String id, TaskStatus status) {
@@ -63,6 +74,7 @@ class TaskListNotifier extends StateNotifier<List<Task>> {
       return task;
     }).toList();
     checkOverdueTasks();
+    _persist();
   }
 
   void rescheduleTask(String id, DateTime newDueDate) {
@@ -77,10 +89,12 @@ class TaskListNotifier extends StateNotifier<List<Task>> {
       }
       return task;
     }).toList();
+    _persist();
   }
 
   void deleteTask(String id) {
     state = state.where((task) => task.id != id).toList();
+    _persist();
   }
 
   bool completeTaskByName(String name) {
@@ -95,6 +109,7 @@ class TaskListNotifier extends StateNotifier<List<Task>> {
       }
       return task;
     }).toList();
+    _persist();
     return found;
   }
 }

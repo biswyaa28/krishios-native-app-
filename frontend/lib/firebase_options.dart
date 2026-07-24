@@ -39,12 +39,14 @@ class DefaultFirebaseOptions {
     projectId: 'krishios-c9e32',
     storageBucket: 'krishios-c9e32.firebasestorage.app',
   );
+
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD-d1ZnDGPi6ohNxrUWnSWjnWUEAbjzVyE',
     appId: '1:307749770376:ios:ae60ae049645423fae7b3d',
     messagingSenderId: '307749770376',
     projectId: 'krishios-c9e32',
     storageBucket: 'krishios-c9e32.firebasestorage.app',
+    iosClientId: '307749770376-c4s5a5ev5ag84ginjakd3aeqjkp8n5vg.apps.googleusercontent.com',
     iosBundleId: 'com.krishios.krishios',
   );
   static const FirebaseOptions macos = FirebaseOptions(

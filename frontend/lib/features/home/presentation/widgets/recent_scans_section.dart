@@ -80,7 +80,7 @@ class RecentScansSection extends ConsumerWidget {
         : 'N/A';
 
     return Container(
-      width: 280,
+      width: 295,
       margin: const EdgeInsets.only(right: 16, bottom: 8, top: 4),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
@@ -135,9 +135,24 @@ class RecentScansSection extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Conf: $confidenceText', style: AppTextStyles.bodySm.copyWith(color: AppColors.outline)),
-                Text(dateText, style: AppTextStyles.bodySm.copyWith(color: AppColors.outline)),
+                Flexible(
+                  child: Text(
+                    'Conf: $confidenceText',
+                    style: AppTextStyles.bodySm.copyWith(color: AppColors.outline),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    dateText,
+                    style: AppTextStyles.bodySm.copyWith(color: AppColors.outline),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 4),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       width: 8,

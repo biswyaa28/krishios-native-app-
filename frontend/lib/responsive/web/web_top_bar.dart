@@ -89,7 +89,7 @@ class WebTopBar extends ConsumerWidget {
             ),
             tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
             onPressed: () {
-              ref.read(themeModeProvider.notifier).state = isDark ? ThemeMode.light : ThemeMode.dark;
+              ref.read(themeModeProvider.notifier).toggle();
             },
           ),
           const SizedBox(width: 8),

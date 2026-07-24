@@ -39,6 +39,16 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# iOS credentials and build artifacts
+ios/Runner/GoogleService-Info.plist
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/ServiceDefinitions.json
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile

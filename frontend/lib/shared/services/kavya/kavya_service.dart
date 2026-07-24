@@ -131,7 +131,7 @@ class KavyaService {
     }
 
     // 5. Compile active application context
-    final context = _contextManager.buildContext(scanId);
+    final context = await _contextManager.buildContext(scanId);
 
     // 6. Select pluggable AI engine dynamically (Hybrid online/offline execution)
     final manager = _ref.read(aiEngineManagerProvider);

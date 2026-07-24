@@ -9,7 +9,7 @@ class ContextManager {
 
   ContextManager(this._ref);
 
-  Map<String, dynamic> buildContext(String? scanId) {
+  Future<Map<String, dynamic>> buildContext(String? scanId) async {
     final context = <String, dynamic>{};
 
     // 1. Language Preference
@@ -41,13 +41,16 @@ class ContextManager {
     context['totalScans'] = scanHistory.length;
     context['averageHealth'] = _ref.read(averageHealthProvider);
 
-    // 4. Weather Context
-    final weatherAsync = _ref.read(weatherProvider);
-    final weather = weatherAsync.value;
-    if (weather != null) {
-      context['weatherTemp'] = weather.temperature;
-      context['weatherHumidity'] = weather.humidity;
-      context['weatherPrecipitation'] = weather.precipitation;
+    // 4. Weather Context (properly awaits the FutureProvider)
+    try {
+      final weather = await _ref.read(weatherProvider.future);
+      if (weather != null) {
+        context['weatherTemp'] = weather.temperature;
+        context['weatherHumidity'] = weather.humidity;
+        context['weatherPrecipitation'] = weather.precipitation;
+      }
+    } catch (_) {
+      // Weather unavailable — proceed without it
     }
 
     // 5. Time of day details

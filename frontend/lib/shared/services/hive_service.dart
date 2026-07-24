@@ -12,6 +12,7 @@ class HiveService {
   static const String scanHistoryBox = 'scan_history';
   static const String userPrefsBox = 'user_prefs';
   static const String draftsBox = 'community_drafts';
+  static const String tasksBox = 'tasks';
 
   static const String _secureStorageKey = 'hive_encryption_key';
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage(
@@ -23,7 +24,7 @@ class HiveService {
       if (!kIsWeb) {
         final dir = await getApplicationDocumentsDirectory();
         // Clean up lock files
-        for (final name in [weatherBox, scanHistoryBox, userPrefsBox, draftsBox, 'app_notifications']) {
+        for (final name in [weatherBox, scanHistoryBox, userPrefsBox, draftsBox, tasksBox, 'app_notifications']) {
           final lock = File('${dir.path}/$name.lock');
           if (await lock.exists()) {
             try { await lock.delete(); } catch (_) {}
@@ -65,6 +66,7 @@ class HiveService {
       await Hive.openBox<ScanResult>(scanHistoryBox, encryptionCipher: cipher);
       await Hive.openBox(userPrefsBox, encryptionCipher: cipher);
       await Hive.openBox(draftsBox, encryptionCipher: cipher);
+      await Hive.openBox(tasksBox, encryptionCipher: cipher);
       await Hive.openBox('app_notifications');
     } catch (e) {
       // Graceful error recovery: Open unencrypted fallback boxes if platform keystore is unavailable
@@ -73,6 +75,7 @@ class HiveService {
       await Hive.openBox<ScanResult>(scanHistoryBox);
       await Hive.openBox(userPrefsBox);
       await Hive.openBox(draftsBox);
+      await Hive.openBox(tasksBox);
       await Hive.openBox('app_notifications');
     }
   }
@@ -81,4 +84,5 @@ class HiveService {
   static Box<ScanResult> getScanHistoryBox() => Hive.box<ScanResult>(scanHistoryBox);
   static Box getUserPrefsBox() => Hive.box(userPrefsBox);
   static Box getDraftsBox() => Hive.box(draftsBox);
+  static Box getTasksBox() => Hive.box(tasksBox);
 }

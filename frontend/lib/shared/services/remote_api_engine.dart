@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' show File;
+import 'dart:typed_data' show Uint8List;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:http/http.dart' as http;
@@ -26,21 +27,37 @@ class RemoteApiEngine implements AIEngine {
     final uri = Uri.parse(resolvedUrl).replace(path: '/predict');
 
     try {
+      final String? filePath;
+      final Uint8List? bytes;
+
+      if (imageFile is XFile) {
+        filePath = imageFile.path;
+        bytes = await imageFile.readAsBytes();
+      } else if (imageFile is File) {
+        filePath = imageFile.path;
+        bytes = await imageFile.readAsBytes();
+      } else if (imageFile is String) {
+        filePath = imageFile;
+        bytes = await File(imageFile).readAsBytes();
+      } else if (imageFile is Uint8List) {
+        filePath = null;
+        bytes = imageFile;
+      } else {
+        return AIEngineResult.failure('Unsupported image file type: ${imageFile.runtimeType}');
+      }
+
       final http.MultipartFile multipartFile;
-      if (kIsWeb) {
-        final xFile = imageFile as XFile;
-        final bytes = await xFile.readAsBytes();
+      if (kIsWeb || filePath == null || filePath.isEmpty) {
         multipartFile = http.MultipartFile.fromBytes(
           'file',
-          bytes,
+          bytes!,
           filename: 'image.jpg',
           contentType: MediaType('image', 'jpeg'),
         );
       } else {
-        final file = imageFile as File;
         multipartFile = await http.MultipartFile.fromPath(
           'file',
-          file.path,
+          filePath,
           contentType: MediaType('image', 'jpeg'),
         );
       }

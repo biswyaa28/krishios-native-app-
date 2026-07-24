@@ -1,19 +1,14 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'scan_result_screen.dart';
-import 'package:geolocator/geolocator.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/scan_result.dart';
 import '../../presentation/providers/scan_provider.dart';
@@ -83,14 +78,13 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
     }
   }
 
-  Future<void> _processImage(String imagePath) async {
+  Future<void> _processImage(XFile xfile) async {
     setState(() {
       _isProcessing = true;
       _statusMessage = 'Uploading crop image...';
     });
 
     try {
-      final File imageFile = File(imagePath);
       String downloadUrl = '';
       final user = FirebaseAuth.instance.currentUser;
       final userId = user?.uid ?? 'guest-user';
@@ -103,89 +97,45 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
             .child('scans')
             .child(userId)
             .child('$scanId.jpg');
-        
-        await storageRef.putFile(imageFile);
+
+        if (kIsWeb) {
+          await storageRef.putData(await xfile.readAsBytes());
+        } else {
+          await storageRef.putFile(File(xfile.path));
+        }
         downloadUrl = await storageRef.getDownloadURL();
       } catch (e) {
         debugPrint('[WARNING] Firebase Storage upload failed: $e. Using local path.');
-        downloadUrl = imagePath;
+        downloadUrl = xfile.path;
       }
 
       setState(() {
         _statusMessage = 'Diagnosing leaf pathology...';
       });
 
-      // 2. Fetch Geolocation
+      // 2. Fetch Geolocation (properly awaits the FutureProvider)
       double? lat;
       double? lon;
-      final posAsync = ref.read(positionProvider);
-      if (posAsync is AsyncData<Position?> && posAsync.value != null) {
-        lat = posAsync.value!.latitude;
-        lon = posAsync.value!.longitude;
-      }
-
-      // 3. Call AI REST API Backend
-      String diagnosis = 'Unknown';
-      double confidence = 0.0;
-      double? healthScore;
-
-      List<Uri> candidateUris = [];
-      if (kIsWeb) {
-        final origin = Uri.base.origin;
-        candidateUris.add(Uri.parse('$origin/api/predict'));
-        if (origin.contains('localhost') || origin.contains('127.0.0.1')) {
-          candidateUris.add(Uri.parse('http://localhost:8000/predict'));
-          candidateUris.add(Uri.parse('http://localhost:8080/predict'));
+      try {
+        final pos = await ref.read(positionProvider.future);
+        if (pos != null) {
+          lat = pos.latitude;
+          lon = pos.longitude;
         }
-      } else {
-        final override = ApiConstants.overrideHost;
-        final host = override ?? (defaultTargetPlatform == TargetPlatform.android ? '10.0.2.2' : 'localhost');
-        candidateUris.add(Uri.parse(ApiConstants.scanBaseUrl.replaceFirst('localhost', host)).replace(path: '/predict'));
-        candidateUris.add(Uri.parse('http://$host:8000/predict'));
+      } catch (_) {
+        // Location unavailable — proceed without it
       }
 
-      bool apiSuccess = false;
-      String? lastError;
+      // 3. Call shared AI engine (auto-routes between cloud and on-device)
+      final engine = ref.read(aiEngineManagerProvider);
+      final aiResult = await engine.processImage(xfile);
 
-      for (final uri in candidateUris) {
-        try {
-          final http.MultipartRequest request = http.MultipartRequest('POST', uri);
-          if (kIsWeb) {
-            final bytes = await XFile(imagePath).readAsBytes();
-            request.files.add(http.MultipartFile.fromBytes(
-              'file',
-              bytes,
-              filename: 'leaf_scan.jpg',
-              contentType: MediaType('image', 'jpeg'),
-            ));
-          } else {
-            request.files.add(await http.MultipartFile.fromPath('file', imagePath, contentType: MediaType('image', 'jpeg')));
-          }
-
-          final streamedResponse = await request.send().timeout(const Duration(seconds: 8));
-          final response = await http.Response.fromStream(streamedResponse);
-
-          if (response.statusCode == 200) {
-            final data = jsonDecode(response.body) as Map<String, dynamic>;
-            diagnosis = data['prediction'] as String? ?? 'Tomato Early Blight';
-            confidence = (data['confidence'] as num?)?.toDouble() ?? 0.94;
-            healthScore = (data['health_score'] as num?)?.toDouble();
-            apiSuccess = true;
-            break;
-          } else {
-            lastError = 'HTTP ${response.statusCode} from $uri';
-          }
-        } catch (e) {
-          lastError = '$e from $uri';
-        }
-      }
-
-      if (!apiSuccess) {
-        debugPrint('[WARNING] Could not reach AI server via candidate endpoints. Last error: $lastError');
+      if (!aiResult.success) {
+        debugPrint('[WARNING] AI engine diagnosis failed: ${aiResult.errorMessage}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('AI Backend server not reachable on localhost:8000. Ensure "python app.py" is running.'),
+              content: Text('Diagnosis failed: ${aiResult.errorMessage}'),
               duration: const Duration(seconds: 4),
             ),
           );
@@ -193,6 +143,10 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
         setState(() => _isProcessing = false);
         return;
       }
+
+      final diagnosis = aiResult.prediction;
+      final confidence = aiResult.confidence;
+      final healthScore = aiResult.healthScore;
 
       // Extract crop classification
       final words = diagnosis.split(' ');
@@ -277,7 +231,7 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
     }
     try {
       final XFile file = await _controller!.takePicture();
-      await _processImage(file.path);
+      await _processImage(file);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -292,7 +246,7 @@ class _CropScanScreenState extends ConsumerState<CropScanScreen> {
       final ImagePicker picker = ImagePicker();
       final XFile? file = await picker.pickImage(source: ImageSource.gallery);
       if (file != null) {
-        await _processImage(file.path);
+        await _processImage(file);
       }
     } catch (e) {
       if (mounted) {

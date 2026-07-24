@@ -9,7 +9,7 @@ class ApiConstants {
   /// - Physical device: defaults to scanBaseUrl host;
   ///   override by setting [overrideHost] to your machine's LAN IP
   // ignore: unnecessary_nullable_for_final_variable_declarations
-  static const String? overrideHost = '10.39.149.7';
+  static const String? overrideHost = '10.171.249.162';
 
   static const String fallbackLocationName = 'Patna, Bihar (Fallback)';
   static const double fallbackLatitude = 25.6;

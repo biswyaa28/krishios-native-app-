@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show ChangeNotifier, debugPrint;
 import 'package:http/http.dart' as http;
 import '../models/ai_engine_result.dart';
+import 'ai_engine.dart';
 import 'on_device_onnx_engine.dart';
 import 'remote_api_engine.dart';
 
@@ -11,14 +12,26 @@ enum AIEngineMode {
 }
 
 class AIEngineManager extends ChangeNotifier {
-  final OnDeviceOnnxEngine _onnxEngine = OnDeviceOnnxEngine();
-  final RemoteApiEngine _apiEngine;
+  final AIEngine _onnxEngine;
+  final AIEngine _apiEngine;
+  final Future<bool> Function()? _apiReachabilityCheck;
+  final String _host;
+  final String _scanBaseUrl;
   AIEngineMode _currentMode = AIEngineMode.auto;
   bool _apiReachable = false;
   String? _initError;
 
-  AIEngineManager({required String scanBaseUrl, required String host})
-      : _apiEngine = RemoteApiEngine(scanBaseUrl: scanBaseUrl, host: host);
+  AIEngineManager({
+    required String scanBaseUrl,
+    required String host,
+    AIEngine? localEngine,
+    AIEngine? remoteEngine,
+    Future<bool> Function()? apiReachabilityCheck,
+  })  : _onnxEngine = localEngine ?? OnDeviceOnnxEngine(),
+        _apiEngine = remoteEngine ?? RemoteApiEngine(scanBaseUrl: scanBaseUrl, host: host),
+        _apiReachabilityCheck = apiReachabilityCheck,
+        _host = host,
+        _scanBaseUrl = scanBaseUrl;
 
   Future<void> initialize() async {
     try {
@@ -40,9 +53,13 @@ class AIEngineManager extends ChangeNotifier {
   }
 
   Future<bool> checkApiReachable() async {
+    if (_apiReachabilityCheck != null) {
+      return _apiReachabilityCheck();
+    }
+
     try {
-      final cleanHost = _apiEngine.host.trim();
-      final resolvedUrl = _apiEngine.scanBaseUrl.replaceFirst('localhost', cleanHost);
+      final cleanHost = _host.trim();
+      final resolvedUrl = _scanBaseUrl.replaceFirst('localhost', cleanHost);
       final uri = Uri.parse(resolvedUrl).replace(path: '/health');
       final response = await http.get(uri).timeout(const Duration(milliseconds: 1500));
       return response.statusCode == 200;
@@ -52,9 +69,10 @@ class AIEngineManager extends ChangeNotifier {
   }
 
   Future<AIEngineResult> processImage(dynamic imageFile) async {
-    // 1. Update API reachability status
-    _apiReachable = await checkApiReachable();
-    notifyListeners();
+    if (_currentMode != AIEngineMode.forceLocal) {
+      _apiReachable = await checkApiReachable();
+      notifyListeners();
+    }
 
     // 2. Decide engine route
     bool useCloud = false;
@@ -102,8 +120,8 @@ class AIEngineManager extends ChangeNotifier {
   bool get apiReachable => _apiReachable;
 
   String get resolvedBaseUrl {
-    final cleanHost = _apiEngine.host.trim();
-    return _apiEngine.scanBaseUrl.replaceFirst('localhost', cleanHost);
+    final cleanHost = _host.trim();
+    return _scanBaseUrl.replaceFirst('localhost', cleanHost);
   }
 
   void setEngineMode(AIEngineMode mode) {

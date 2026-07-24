@@ -1,0 +1,47 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_secure_storage (6.0.0):
+    - Flutter
+  - flutter_tts (0.0.1):
+    - Flutter
+  - onnxruntime-c (1.23.0)
+  - onnxruntime-objc (1.23.0):
+    - onnxruntime-objc/Core (= 1.23.0)
+  - onnxruntime-objc/Core (1.23.0):
+    - onnxruntime-c (= 1.23.0)
+  - onnxruntime_v2 (0.0.1):
+    - Flutter
+    - onnxruntime-objc (= 1.23.0)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
+  - onnxruntime_v2 (from `.symlinks/plugins/onnxruntime_v2/ios`)
+
+SPEC REPOS:
+  trunk:
+    - onnxruntime-c
+    - onnxruntime-objc
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  flutter_tts:
+    :path: ".symlinks/plugins/flutter_tts/ios"
+  onnxruntime_v2:
+    :path: ".symlinks/plugins/onnxruntime_v2/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  flutter_tts: 35ac3c7d42412733e795ea96ad2d7e05d0a75113
+  onnxruntime-c: 3174c63a963d9abbc2bf9627e3d622819c0ed5f7
+  onnxruntime-objc: 1254d12f8160e562e7693ff17f5aa3dd17dc409e
+  onnxruntime_v2: 4efe47858784a1fd65b5fc6d71d179f1d82b029d
+
+PODFILE CHECKSUM: 1be1ea11fc22ab84f616a28eec13fad6ca123f23
+
+COCOAPODS: 1.17.0
